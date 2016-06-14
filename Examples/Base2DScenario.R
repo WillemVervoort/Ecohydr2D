@@ -2,57 +2,18 @@
 # Some real scenario runs
 # 
 # This is the base case without rainfall as suggested by Sjoerd
-# e-mail 20140109
 require(lattice)
 
 setwd("x:/vervoort/research/ecohydrology/2dmodelling")
 today <- format(Sys.Date(),"%Y%m%d")
 
+# read in all data
+load("2dmodellingBaseData/Allinput.rdata")
 
 # In advance, define all parameters in gwt_input_parameters.r
 #edit(file="X:/vervoort/research/rcode/ecohydrology/2dmodelling/gwt_input_parameters.r")
 # source functions
-source("X:/vervoort/research/rcode/ecohydrology/ecohydrology2dmodelling/20130620_2dmodellingfunction.r")
-
-#### Read in the Rain data and climate data
-# adjusted WV 20120830
-Climate <- read.csv("YuleClim.csv")
-Rain <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"), Rain=Climate[,2]/10) # already in cm/d
-# Put in no rain
-#Rain <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"), Rain=rep(0,nrow(Climate))) 
-ETp <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"), ETp=rep(Climate[,5]/10))
-GWdata <- read.csv("20131213_YuleRiverGWdata.csv")
-
-xyplot(Rain~dates,data=Rain,type="h")
-
-# adjusted WV 20120928 
-# daily streamflow
-Stream <- read.csv("20120928_yulerivlev.csv")
-# This is the righthand boundary condition
-head(Stream)
-xyplot(Stream$Height~as.Date(Stream$Date,"%d/%m/%Y"),type="l")
-
-# There are missing data in the stream data
-# need to match the stream dates to the climate dates
-Stream.adj <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"),
-                 Height=Stream$Height[match(as.Date(Climate[,1], "%d/%m/%Y"),
-                                      as.Date(Stream[,1], "%d/%m/%Y"))])
-
-# now need to fill the missing values as the model does not deal with NA
-# use spline.fun with rainfall to fill
-st.fun <- splinefun(Climate[,2],Stream.adj[,2])
-Stream.adj[is.na(Stream.adj[,2]==T),2] <- st.fun(Climate[is.na(Stream.adj[,2]==T),2])
-
-z <- nchar(as.character(Stream[,1]))
-Stream.month <- aggregate(Stream$Height,
-		list(month=substr(Stream[,1],z-6,z-5),
-		year=substr(Stream[,1],z-3,z)),
-		sum)
-head(Stream.month)
-Stream.month$date <- as.Date(paste(Stream.month$year,Stream.month$month,"01",
-			sep="-"))
-xyplot(x~date,Stream.month,type="h",lwd=3,col="gray25",xlab=list("Date",font=2,cex=1.2),
-		ylab=list("Monthly streamflow in mm",font=2,cex=1.2),scales=list(font=2,cex=1.2))
+source("X:/vervoort/research/rcode/ecohydrology/ecohydrology2dmodelling/functions/2dmodellingfunction.r")
 
 # Now run a few different simulations
 # define initial gwheads and Zmean
@@ -69,12 +30,11 @@ set.seed(1000)
 veg <- rep("Grass",32)
 veg[sample(1:length(veg),size=ceiling(0.3*length(veg)))] <- 
 			"Bare"
+# define the trees section
 veggies <- c(rep("TreesDR",10), veg)
 soils <- "L Med Clay"
-sp <- Soil("Loamy Sand") #Soil("L Med Clay")
-#result <- big.fun(N=197,stype=soils, aqK_in = sp$K_s/100, vtype=veggies,Rain=Rain, 
- #        ETp=ETp,stream=Stream, gwheads = gw_in, Zmean = Zmean, 
-  #      today.m = today, fs = fs_veg)
+sp <- Soil(soils)
+# define spec_y separately
 sp$spec_y <- 0.15
 #
 # now includes separate K for aquifer (sand) based on Pfautsch et al.

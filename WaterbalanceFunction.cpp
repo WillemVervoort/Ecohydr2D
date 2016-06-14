@@ -2,226 +2,122 @@
 using namespace Rcpp;
 
 // Rewriting the 2-D water balance implementation across grid cells
-// first redefine vegpar
-List Veg(Character vtype, List soilpar) {
-  // general definitions
-  double E_w = 0.01;
-  double k = 0.5;
-  
-  if (vtype == "Grass") {
-    double Zr = 50.0;
-    double delta = 0.1;
-    double psi_ss = -0.09;
-    // calculate s_star
-    double s_star = pow(psi_ss/soilpar["psi_s_bar"],(-1.0/soilpar["b"]));
-    double psi_sw = -3.0;
-    
-    // calculate s_w
-    double s_w = pow(psi_sw/soilpar["psi_s_bar"],(-1.0/soilpar["b"]))
-      
-      // colonisation parameters taken out
-      
-      // vegetation ET parameters
-      double E_max = 0.33;
-    double LAI = 1.5; //Roberts et al. 2000 assuming Kc = 0.8
-    double c_T = 0.45; // Tarrawarra dataset par in Teuling and Troch 2005
-    double fr = 1.0;
-    double Ep = 0.65; // cm/day BOM data average Moree
-    
-    // new groundwater uptake function
-    // defines fraction of roots close to groundwater
-    double c1 = NULL;
-    double fs = NULL;
-    Logical DR = FALSE;
-    
-    // vegmodelling parameters taken out
-    
-  }
-  if (vtype == "TreesDR") {
-    double Zr = 100.0;
-    double delta = 0.2;
-    double psi_ss = -0.12; //Mpa Table 1, F_I & R-I 2004
-    // calculate s_star
-    double s_star = pow(psi_ss/soilpar["psi_s_bar"],(-1.0/soilpar["b"]));
-    double psi_sw = -7.0; //MPa (Eucalyptus Camaldulensis Whitehead and Beadle 2004)
-    
-    // calculate s_w
-    double s_w = pow(psi_sw/soilpar["psi_s_bar"],(-1.0/soilpar["b"]))
-      
-      // colonisation parameters taken out
-      
-      // vegetation ET parameters
-      double E_max = 0.5;
-    double LAI = 0.9; //Roberts et al. 2000 assuming Kc = 0.8
-    double c_T = 0.45; // Tarrawarra dataset par in Teuling and Troch 2005
-    double fr = 1.0;
-    double Ep = 0.65; // cm/day BOM data average Moree
-    
-    // new groundwater uptake function
-    // defines fraction of roots close to groundwater
-    double c1 = 1.0;
-    double fs = 0.25;
-    Logical DR = TRUE;
-    
-    // vegmodelling parameters taken out
-    
-  }
-  
-  if (vtype == "TreesNoDR") {
-    double Zr = 100.0;
-    double delta = 0.2;
-    double psi_ss = -0.12; //Mpa Table 1, F_I & R-I 2004
-    // calculate s_star
-    double s_star = pow(psi_ss/soilpar["psi_s_bar"],(-1.0/soilpar["b"]));
-    double psi_sw = -7.0; //MPa (Eucalyptus Camaldulensis Whitehead and Beadle 2004)
-    
-    // calculate s_w
-    double s_w = pow(psi_sw/soilpar["psi_s_bar"],(-1.0/soilpar["b"]))
-      
-      // colonisation parameters taken out
-      
-      // vegetation ET parameters
-      double E_max = 0.5;
-    double LAI = 0.9; //Roberts et al. 2000 assuming Kc = 0.8
-    double c_T = 0.45; // Tarrawarra dataset par in Teuling and Troch 2005
-    double fr = 1.0;
-    double Ep = 0.65; // cm/day BOM data average Moree
-    
-    // new groundwater uptake function
-    // defines fraction of roots close to groundwater
-    double c1 = 1.0;
-    double fs = 0.25;
-    Logical DR = FALSE;
-    
-    // vegmodelling parameters taken out
-    
-  }
-  
-  if (vtype == "Lignum") {
-    // suggested values F. van Ogtrop & W. Vervoort
-    // No data available?
-    
-    double Zr = 100.0;
-    double delta = 0.2;
-    double psi_ss = -0.12; //Mpa Table 1, F_I & R-I 2004
-    // calculate s_star
-    double s_star = pow(psi_ss/soilpar["psi_s_bar"],(-1.0/soilpar["b"]));
-    double psi_sw = -5.0;
-    
-    // calculate s_w
-    double s_w = pow(psi_sw/soilpar["psi_s_bar"],(-1.0/soilpar["b"]))
-      
-      // colonisation parameters taken out
-      
-      // vegetation ET parameters
-      double E_max = 0.33;
-    double LAI = 2.03; //Roberts et al. 2000 assuming Kc = 0.8
-    double c_T = 0.45; // Tarrawarra dataset par in Teuling and Troch 2005
-    double fr = 1.0;
-    double Ep = 0.65; // cm/day BOM data average Moree
-    
-    // new groundwater uptake function
-    // defines fraction of roots close to groundwater
-    double c1 = NULL;
-    double fs = NULL;
-    Logical DR = TRUE;
-    
-    // vegmodelling parameters taken out
-    
-  }
-  
-  if (vtype == "Bare") {
-    //................................................
-    // Bare Soil
-    // added for 2D project
-    // Willem Vervoort 12/06/13
-    //.................................................
-    
-    double Zr = 25.0;
-    double delta = 0;
-    double psi_ss = -0.01; //Mpa Table 1, F_I & R-I 2004
-    // calculate s_star
-    double s_star = pow(psi_ss/soilpar["psi_s_bar"],(-1.0/soilpar["b"]));
-    double psi_sw = -1.5; //MPa (Eucalyptus Camaldulensis Whitehead and Beadle 2004)
-    
-    // calculate s_w
-    double s_w = pow(psi_sw/soilpar["psi_s_bar"],(-1.0/soilpar["b"]))
-      
-      // colonisation parameters taken out
-      
-      // vegetation ET parameters
-      double E_max = 0.33;
-    double LAI = 1.0; //Roberts et al. 2000 assuming Kc = 0.8
-    double c_T = 0.45; // Tarrawarra dataset par in Teuling and Troch 2005
-    double fr = 1.0;
-    double Ep = 0.65; // cm/day BOM data average Moree
-    
-    // new groundwater uptake function
-    // defines fraction of roots close to groundwater
-    double c1 = NULL;
-    double fs = NULL;
-    Logical DR = FALSE;
-    
-    // vegmodelling parameters taken out
-    
-  }
-  
-  
-}
 
 // E_Teuling
+// [[Rcpp::export]]
 double E_Teuling(double s, List vegpar) {
-  if(s <= vegpar["s_w"]) {
-    double beta_T = 0.0;
-  } else {
-    if (s <= vegpar["s_star"] & s > vegpar["s_w"]) {
-      beta_T = (s - vegpar["s_w"])/(vegpar["s_star"] - vegpar["s_w"]);
+  double sw = vegpar["s_w"]; 
+  double ss = vegpar["s_star"];
+  double beta_T = 0.0;
+  if(s > sw) {
+    if ((s < ss) & (s > sw)) {
+      beta_T = (s - sw)/(ss - sw);
     } else {
       beta_T = 1.0;
     }
   }
-  double E = vegpar["fr"]*beta_T*(1 - exp(-vegpar["c_T"]*vegpar["LAI"]))*vegpar["Ep"];
+  double fr = vegpar["fr"]; 
+  double c_T = vegpar["c_T"]; 
+  double LAI = vegpar["LAI"]; 
+  double Ep = vegpar["Ep"]; 
+  double E = fr*beta_T*(1 - exp(-c_T*LAI))*Ep;
   return(E);
 }	
 
 // G function
+// [[Rcpp::export]]
 double G(double b, double hb, double Z) {
   double b1 = 2.0 + 3.0/b;
   double a1 = 1.0 + (3.0/2.0)/(b1 - 1.0);
   double H1 = a1*pow(hb/Z,b1);
+  return(H1);
+}
+
+// function to generate m values
+// [[Rcpp::export]]
+NumericVector m_fun(List vegpar, List soilpar, double Z_in, double G1) {
+  double Zr = vegpar["Zr"]; 
+  double hb = soilpar["hb"]; 
+  double b = soilpar["b"]; 
+  double Ks = soilpar["K_s"]; 
+  double n = soilpar["n"]; 
+  double beta = soilpar["beta"]; 
+  double ss = vegpar["s_star"];
+  
+  double s_lim = pow((Z_in - Zr)/hb,(-1/b));
+  double m = Ks/(n*Zr*(exp(beta*(1-s_lim))-1));
+  double m1 = Ks*G1/(n*Zr*(exp(beta*(ss-s_lim))-1));
+  double m2 = Ks*G1/(n*Zr);
+  return(NumericVector::create(m,m1,m2));
 }
 
 // rho_new_1
 NumericVector rho_new_1(double s, double Z, List soilpar, List vegpar,
-                        Z.mean=NULL, Z.prev=NULL) {
+                        double Z_mean=NULL, double Z_prev=NULL) {
   // define variables
   double Zr = vegpar["Zr"];
-  double n = soilpar["n"]
-  double b = soilpar["b"]
-  double Ks = soilpar["K_s"]
-  double hb = soilpar["psi_s_bar"]*(-10E4);
-  double s.lim = pow((Z - Zr)/hb,(-1/b));
+  double ss = vegpar["s_star"];
+  double sw = vegpar["s_w"]; 
+  double n = soilpar["n"];
+  double b = soilpar["b"];
+  double Ks = soilpar["K_s"];
+  double psi_s_bar = soilpar["psi_s_bar"];
+  double hb = psi_s_bar*(-10E4);
+  double beta = soilpar["beta"]; 
+  double s_lim = pow((Z - Zr)/hb,(-1/b));
   // apply G function
   double G1 = G(b,hb,(Z-Zr));
   // calculate parameters
-  double m = Ks/(n*Zr*(exp(soilpar["beta"]*(1-s.lim))-1));
-  double m1 = Ks*G1/(n*Zr*(exp(soilpar["beta"]*(vegpar["s_star"]-s.lim))-1));
-  double m1 = Ks*G1/(n*Zr);
-  double E_max = (1-exp(-vegpar["c_T"]*vegpar["LAI"]))*vegapr["Ep"];
+  NumericVector m_values = m_fun(vegpar, soilpar, Z, G1);
+  double E_max = E_Teuling(s=1,vegpar);
   double eta = E_max/(n*Zr);
-  double r = 0;
+  double r = 0.0;
+  double Q = 0.0;
+  double E = 0.0;
   
   // Now calculate the soil moisture
-  if (s > s.lim) {
-    double Q = m*(exp(soilpar["beta"]*(s - s.lim))-1);
+  if (s > s_lim) {
+    double Q = m_values[1]*(exp(beta*(s - s_lim))-1);
     double E = eta;
   }
-  if (m1 < eta) {
+  if (m_values[2] < eta) {
     // define s_cr: s-critical
-    double s_cr = m2/eta*(vegpar["s_star"] - vegpar["s_w"]) + vegpar["s_w"];
+    double s_cr = m_values[3]/eta*(ss - sw) + sw;
     
-    
+    if (s < s_cr) {
+      NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G1 = G(b,hb,(Z_prev-Zr)));
+      //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
+      double E = 0.0;  
+      double Q = -(m_values[3]*((s_cr-sw)/(ss-sw))-m_values_prev[3]*((s-sw)/(ss-sw)));
+    }
+    if (s > s_cr && s <= ss)
+    {
+      double E = eta*((s-s_cr)/(ss-s_cr));
+      double Q = -m_values[3]*((s-s_cr)/(ss - s_cr));
+    } else {
+      if (s > ss && s <= s_lim) {
+        double Q = -m_values[2]*(1-exp(beta*(s-s_lim)));
+        double E = eta;
+      }
+    }
+  } else {
+    if (s > ss && s <= s_lim) {
+      double E = eta;
+      double Q = -m_values[2]*exp(beta*(s-s_lim));
+    } else {    // again, if GW table rises: E=0 and qcap =difference qcap and old transpiration
+      double s_cr = m_values[3]/eta*(ss - sw) + sw;
+      NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G1 = G(b,hb,(Z_prev-Zr)));
+      //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
+      double E = 0.0;  
+      double Q = -(m_values[3]*((s_cr-sw)/(ss-sw))-m_values_prev[3]*((s-sw)/(ss-sw)));
+    }
   }
+    double Q_out = Q*(n*Zr);   
+    double E_out = E*(n*Zr);   
+    double L_out = Q_out + E_out;
+    double qcap = 0.0;
+    if(Q_out < 0) double qcap = abs(Q);
+    return(NumericVector::create(L_out,E_out,0.0,qcap,Q_out));
 }
 
 
