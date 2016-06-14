@@ -1,7 +1,6 @@
 # include <Rcpp.h>
-#include "RootFunctions.cpp"
-#include "VegFun.cpp"
-#include "Fluxfunctions.cpp"
+// this does not work,check out:
+// http://stackoverflow.com/questions/13995266/using-3rd-party-header-files-with-rcpp
 using namespace Rcpp;
 
 

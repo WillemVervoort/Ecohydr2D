@@ -1,6 +1,4 @@
 #include <Rcpp.h>
-#include "RootFunctions.cpp"
-#include "VegFun.cpp"
 using namespace Rcpp;
 
 // E_Teuling
@@ -47,7 +45,7 @@ NumericVector m_fun(List vegpar, List soilpar, double Z_in, double G1) {
   double m = Ks/(n*Zr*(exp(beta*(1-s_lim))-1));
   double m1 = Ks*G1/(n*Zr*(exp(beta*(ss-s_lim))-1));
   double m2 = Ks*G1/(n*Zr);
-  return NumericVector::create(m,m1,m2);
+  return(NumericVector::create(m,m1,m2));
 }
 
 // rho_new_1
@@ -134,7 +132,7 @@ NumericVector Fun_E(double s,double Z,List soilpar,List vegpar) {
   double qcap = 0.0;
   if (Q < 0) qcap = abs(Q); // capillary flow component
   double L = Q + E;    // total losses
-  return NumericVector::create(L,E,0.0,qcap,Q);
+  return(NumericVector::create(L,E,0.0,qcap,Q));
 }
 
 // Feedback model needs function Q_E (bottom flux at the root zone) #equation 6 VvdZ2009

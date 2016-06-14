@@ -19,7 +19,6 @@ public:
 };
 
 // equation 8 VvdZ 2009
-// [[Rcpp::export]]
 double int_test(double c1, double z,double z1,double z2) {
   test_f f(c1,z);
   double err_est;
