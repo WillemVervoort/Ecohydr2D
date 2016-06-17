@@ -30,18 +30,18 @@ double int_test(double c1,double z1,double z2) {
 
 
 // new deep root functions following Orellana et al. 2012
-double s_fun(double x,double fs) {
+double s_fun_cpp(double x,double fs) {
  return exp(-(fs*x)); 
 }
 
 // [[Rcpp::export]]
-double  RWU(double z1,double Zmean, double fs) {
-  return 2*R::dnorm(z1/100,Zmean/100,s_fun(Zmean/100,fs),FALSE); // test values
+double  RWU_cpp(double z1,double Zmean, double fs) {
+  return 2*R::dnorm(z1/100,Zmean/100,s_fun_cpp(Zmean/100,fs),FALSE); // test values
 }
 
 // [[Rcpp::export]]
 double Rc_B_cpp(double z1,double z2,double c1,double Zmean,double fs) {
-  return RWU(z1,Zmean,fs)*int_test(c1,z1,z2);
+  return RWU_cpp(z1,Zmean,fs)*int_test(c1,z1,z2);
 }
 // // You can include R code blocks in C++ files processed with sourceCpp
 // // (useful for testing and development). The R code will be automatically 
@@ -50,6 +50,6 @@ double Rc_B_cpp(double z1,double z2,double c1,double Zmean,double fs) {
 // 
 // 
 // 
-/*** R
-    Rc_B_cpp(0,100,3,100,1.5)
-*/
+// /*** R
+//     Rc_B_cpp(0,100,3,100,1.5)
+// */

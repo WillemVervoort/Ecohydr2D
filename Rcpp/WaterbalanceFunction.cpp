@@ -36,7 +36,7 @@ List WBEcoHyd(NumericVector R, NumericMatrix ETp,
   // run through grid
   for (j=1; j++; (m-1)){
     // Call the vegpar function
-    List vegpar = Veg(vtype(j), soilpar);
+    List vegpar = Veg(vtype[j], soilpar);
     double Ep = ETp[j,2];
     q = 1.0;
     

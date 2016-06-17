@@ -3,7 +3,7 @@ using namespace Rcpp;
 
 // first redefine vegpar
 // [[Rcpp::export]]
-List Veg(std::string vtype, List soilpar) {
+List Veg_cpp(std::string vtype, List soilpar) {
   // general definitions
   double E_w = 0.01;
   double k = 0.5;
@@ -192,6 +192,6 @@ List Veg(std::string vtype, List soilpar) {
 
 // /*** R
 // sourceCpp("soilfun.cpp")
-// soilpar <- Soil("S Clay Loam")
-// Veg("TreesDR", soilpar)
+// soilpar <- Soil_cpp("S Clay Loam")
+// Veg_cpp("TreesDR", soilpar)
 // */

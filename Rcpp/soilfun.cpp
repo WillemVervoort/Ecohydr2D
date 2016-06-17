@@ -8,7 +8,7 @@ using namespace Rcpp;
 // To simplify soil input
 // ########################################
 // [[Rcpp::export]]
-List  Soil(std::string stype) {
+List  Soil_cpp(std::string stype) {
   double psi_sh = -10.0;
 
   // default = Medium Light Clay
@@ -20,7 +20,7 @@ List  Soil(std::string stype) {
   // double  avg  = 0.0591;
     double s_fc = 0.364/n; // Field capacity
     double psi_s_bar = -1.5E-3; // This is the bubbling pressure
-    double hb = psi_s_bar*(-10E4);
+    double hb = psi_s_bar*(-1e4);
     double spec_y = 0.054; //Johnson 1967 says 0.05, specific yield. 
 
   if (stype == "L Med Clay Stony") {
@@ -33,7 +33,7 @@ List  Soil(std::string stype) {
     // avg = 0.0591;
      s_fc = 0.264/n; // Field capacity
      psi_s_bar = -1.5E-3; // This is the bubbling pressure
-     hb = psi_s_bar*(-10E4);
+     hb = psi_s_bar*(-1e4);
      spec_y = 0.054; //Johnson 1967 says 0.05, specific yield. 
   }
   
@@ -48,7 +48,7 @@ List  Soil(std::string stype) {
      s_fc = 0.2677/n; // Field capacity
     
      psi_s_bar = -1.2E-3;
-     hb = psi_s_bar*(-10E4);
+     hb = psi_s_bar*(-1e4);
      spec_y = 0.07;  //difference Fc and por Johnson 1967 says 0.07 
   }
   
@@ -76,8 +76,8 @@ List  Soil(std::string stype) {
     // nvg = 1.086;
      s_fc = 0.3936/n; // Field capacity
     
-     psi_s_bar = -1.4E-3;
-     hb = psi_s_bar*(-10E4);
+     psi_s_bar = -1.4e-3;
+     hb = psi_s_bar*-1.0e4;
      spec_y = 0.05;  // difference por and fc
   }
   
@@ -92,7 +92,7 @@ List  Soil(std::string stype) {
      s_fc = 0.3818/n; // Field capacity
     
      psi_s_bar = -1.75E-3; // This is the bubbling pressure
-     hb = psi_s_bar*(-10E4);
+     hb = psi_s_bar*-1.0e4;
      spec_y = 0.05; // difference por and fc
   }
   
@@ -107,7 +107,7 @@ List  Soil(std::string stype) {
      s_fc = 0.1895/n; // Field capacity
     
      psi_s_bar = -0.61E-3; // This is the bubbling pressure
-     hb = psi_s_bar*(-10E4);
+     hb = psi_s_bar*-1.0e4;
      spec_y = 0.27;  // difference por and fc
   }
   
@@ -143,5 +143,5 @@ return(Rcpp::List::create(Rcpp::Named("n") = n,
 //
 
 //  /*** R
-// Soil("S Clay Loam")
+// Soil_cpp("S Clay Loam")
 // */
