@@ -35,7 +35,7 @@ List Veg_cpp(std::string vtype, List soilpar) {
     double c1 = 0.0;
     double fs = 0.0;
     bool DR = FALSE;
-    
+    double q = 1.0;
     // vegmodelling parameters taken out
     
   
@@ -64,6 +64,7 @@ List Veg_cpp(std::string vtype, List soilpar) {
      c1 = 1.0;
      fs = 0.25;
      DR = TRUE;
+     double q = 1.0;
     
     // vegmodelling parameters taken out
     
@@ -94,7 +95,8 @@ List Veg_cpp(std::string vtype, List soilpar) {
      c1 = 1.0;
      fs = 0.25;
      DR = FALSE;
-    
+     double q = 1.0;
+     
     // vegmodelling parameters taken out
     
   }
@@ -127,7 +129,7 @@ List Veg_cpp(std::string vtype, List soilpar) {
      c1 = 0.0;
      fs = 0.0;
      DR = TRUE;
-    
+     double q = 1.0;
     // vegmodelling parameters taken out
     
   }
@@ -163,6 +165,7 @@ List Veg_cpp(std::string vtype, List soilpar) {
      c1 = 0.0;
      fs = 0.0;
      DR = FALSE;
+     double q = 1.0;
     
     // vegmodelling parameters taken out
     
@@ -180,7 +183,8 @@ List Veg_cpp(std::string vtype, List soilpar) {
                             Rcpp::Named("Ep") = Ep,
                             Rcpp::Named("c1") = c1,
                             Rcpp::Named("fs") = fs,
-                            Rcpp::Named("DR") = DR));
+                            Rcpp::Named("DR") = DR,
+                            Rcpp::Named("q") = q));
   
   
 }

@@ -221,7 +221,7 @@ NumericVector Fun_FB_cpp(double s,List soilpar,List vegpar,double Z,double Zmean
 // Combines old rho_new1 with FB_fun
 // Including Joep's adjustment for Z.prev
 // [[Rcpp::export]]
-NumericVector FB_new_cpp(float s,List soilpar_in,List vegpar_in, double Zfb, 
+NumericVector FB_new_cpp(double s,List soilpar_in,List vegpar_in, double Zfb, 
               double Zmean, double Z_prev) {
   double Zr = vegpar_in["Zr"];
   double ss = vegpar_in["s_star"];
@@ -309,7 +309,7 @@ NumericVector FB_new_cpp(float s,List soilpar_in,List vegpar_in, double Zfb,
 sourceCpp("soilfun.cpp")
 sourceCpp("Vegfun.cpp")
 sourceCpp("RootFunctions.cpp")
-soilpar = Soil_cpp("M Clay")
-vegpar = Veg_cpp("TreesDR", soilpar)
-FB_new_cpp(0.4,soilpar,vegpar,200,190,190)
+# soilpar = Soil_cpp("M Clay")
+# vegpar = Veg_cpp("TreesDR", soilpar)
+# FB_new_cpp(0.4,soilpar,vegpar,200,190,190)
 */
