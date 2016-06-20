@@ -1,0 +1,3 @@
+useDynLib(EcoHydro2D)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
