@@ -1,7 +1,7 @@
-// [[Rcpp::depends(RcppEigen)]]
-// [[Rcpp::depends(RcppNumerical)]]
 #include <Rcpp.h>
 #include <RcppNumerical.h>
+#include "VegFun.hpp"
+#include "Fluxfunctions.hpp"
 using namespace Rcpp;
 using namespace Numer;
 

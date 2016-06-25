@@ -1,3 +1,7 @@
+#ifndef __Fluxfunctions__
+#define __Fluxfunctions__
+
+
 #include <Rcpp.h>
 #include <RcppNumerical.h>
 using namespace Rcpp;
@@ -17,7 +21,7 @@ public:
 };
 
 // equation 8 VvdZ 2009
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 double int_test(double c1,double z1,double z2) {
   test_f f(c1);
   double err_est;
@@ -33,19 +37,19 @@ double s_fun_cpp(double x,double fs) {
   return exp(-(fs*x)); 
 }
 
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 double  RWU_cpp(double z1,double Zmean, double fs) {
   return 2*R::dnorm(z1/100,Zmean/100,s_fun_cpp(Zmean/100,fs),FALSE); // test values
 }
 
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 double Rc_B_cpp(double z1,double z2,double c1,double Zmean,double fs) {
   return RWU_cpp(z1,Zmean,fs)*int_test(c1,z1,z2);
 }
 
 
 // E_Teuling
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 double E_Teuling_cpp(double s, List vegpar) {
   const double sw = vegpar["s_w"]; 
   const double ss = vegpar["s_star"];
@@ -67,7 +71,7 @@ double E_Teuling_cpp(double s, List vegpar) {
 }	
 
 // G function
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 double G_cpp(double b, double hb, double Z) {
   double b1 = 2.0 + 3.0/b;
   double a1 = 1.0 + (3.0/2.0)/(b1 - 1.0);
@@ -76,7 +80,7 @@ double G_cpp(double b, double hb, double Z) {
 }
 
 // function to generate m values
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 NumericVector m_fun(List vegpar_i, List soilpar_i, double Z_in, double Gin) {
   const double Zr = vegpar_i["Zr"]; 
   const double b = soilpar_i["b"]; 
@@ -94,7 +98,7 @@ NumericVector m_fun(List vegpar_i, List soilpar_i, double Z_in, double Gin) {
 }
 
 // rho_new_1
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 NumericVector rho_new_cpp(double s, double ZZ, List soilpar, List vegpar,
                         double Z_mean, double Z_prev) {
   // define variables
@@ -161,7 +165,7 @@ NumericVector rho_new_cpp(double s, double ZZ, List soilpar, List vegpar,
 }
 
 // Eagleson function
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 NumericVector Fun_E_cpp(double s,double Z,List soilpar,List vegpar) {
   double Zr = vegpar["Zr"];
   double b = soilpar["b"];
@@ -192,7 +196,7 @@ double Q_E_cpp(double s,double Z,List soilpar,List vegpar) {
 // in RootFunctions.cpp
 
 // Feedback DR Model Vervoort and van der Zee (2009)
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 NumericVector Fun_FB_cpp(double s,List soilpar,List vegpar,double Z,double Zmean) {
   double Zr = vegpar["Zr"];
   double c1 = vegpar["c1"]; 
@@ -219,7 +223,7 @@ NumericVector Fun_FB_cpp(double s,List soilpar,List vegpar,double Z,double Zmean
 // added 13/09/2012
 // Combines old rho_new1 with FB_fun
 // Including Joep's adjustment for Z.prev
-//// [[Rcpp::export]]
+// [[Rcpp::export]]
 NumericVector FB_new_cpp(double s,List soilpar_in,List vegpar_in, double Zfb, 
               double Zmean, double Z_prev) {
   double Zr = vegpar_in["Zr"];
@@ -312,3 +316,5 @@ NumericVector FB_new_cpp(double s,List soilpar_in,List vegpar_in, double Zfb,
 // # vegpar = Veg_cpp("TreesDR", soilpar)
 // # FB_new_cpp(0.4,soilpar,vegpar,200,190,190)
 // */
+
+#endif //__Fluxfunctions__

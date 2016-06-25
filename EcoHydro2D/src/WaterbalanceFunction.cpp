@@ -1,10 +1,12 @@
-# include <Rcpp.h>
+#include <Rcpp.h>
 #include <RcppNumerical.h>
+#include "VegFun.hpp"
+#include "Fluxfunctions.hpp"
 using namespace Rcpp;
 using namespace Numer;
 
 // static stress function
-// [[Rcpp::export]]
+//// [[Rcpp::export]]
 double zeta(double s,double s_star, double s_w,double q) {
   double temp = std::max(pow((s_star-s)/(s_star-s_w),q),0.0);
   double out = std::min(temp,1.0);
@@ -14,7 +16,7 @@ double zeta(double s,double s_star, double s_w,double q) {
 
 // Rewriting the 2-D water balance implementation across grid cells
 // First rewrite the water balance function
-// [[Rcpp::export]]
+//// [[Rcpp::export]]
 List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat, 
                    List soilpar_in, 
                    double Zmean_in,
