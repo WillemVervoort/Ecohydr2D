@@ -49,7 +49,15 @@ Soil_cpp <- function(stype) {
     .Call('EcoHydro2D_Soil_cpp', PACKAGE = 'EcoHydro2D', stype)
 }
 
-WBEcoHyd <- function(R, ETp, vegtype, soilpar, s_init, fullday, model, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY, t) {
-    .Call('EcoHydro2D_WBEcoHyd', PACKAGE = 'EcoHydro2D', R, ETp, vegtype, soilpar, s_init, fullday, model, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY, t)
+zeta <- function(s, s_star, s_w, q) {
+    .Call('EcoHydro2D_zeta', PACKAGE = 'EcoHydro2D', s, s_star, s_w, q)
+}
+
+WB_fun_cpp <- function(vegpar_in, In, last_t_soil_sat, soilpar_in, Zmean_in, deltat, Z_prev, Z_in) {
+    .Call('EcoHydro2D_WB_fun_cpp', PACKAGE = 'EcoHydro2D', vegpar_in, In, last_t_soil_sat, soilpar_in, Zmean_in, deltat, Z_prev, Z_in)
+}
+
+WBEcoHyd <- function(x, y, t, R, ETp, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY) {
+    .Call('EcoHydro2D_WBEcoHyd', PACKAGE = 'EcoHydro2D', x, y, t, R, ETp, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY)
 }
 

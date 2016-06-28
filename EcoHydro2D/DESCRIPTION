@@ -2,7 +2,7 @@ Package: EcoHydro2D
 Type: Package
 Title: 2D functions of ecohydrology project cpp versions
 Version: 0.1
-Date: 2016-06-20
+Date: 2016-06-25
 Author: Willem Vervoort
 Maintainer: Willem Vervoort <willemvervoort@gmail.com>
 Description: More about what it does (maybe more than one line)
