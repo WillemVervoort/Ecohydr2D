@@ -147,16 +147,6 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP EcoHydro2D_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    __result = Rcpp::wrap(rcpp_hello_world());
-    return __result;
-END_RCPP
-}
 // Soil_cpp
 List Soil_cpp(std::string stype);
 RcppExport SEXP EcoHydro2D_Soil_cpp(SEXP stypeSEXP) {
@@ -165,6 +155,18 @@ BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< std::string >::type stype(stypeSEXP);
     __result = Rcpp::wrap(Soil_cpp(stype));
+    return __result;
+END_RCPP
+}
+// Veg_cpp
+List Veg_cpp(std::string vtype, List soilpar);
+RcppExport SEXP EcoHydro2D_Veg_cpp(SEXP vtypeSEXP, SEXP soilparSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< std::string >::type vtype(vtypeSEXP);
+    Rcpp::traits::input_parameter< List >::type soilpar(soilparSEXP);
+    __result = Rcpp::wrap(Veg_cpp(vtype, soilpar));
     return __result;
 END_RCPP
 }
@@ -201,16 +203,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // WBEcoHyd
-NumericMatrix WBEcoHyd(int x, int y, int t, NumericVector R, NumericVector ETp, CharacterVector vtype, List soilpar, NumericVector s_init, double fullday, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, NumericVector NX, NumericVector NY);
-RcppExport SEXP EcoHydro2D_WBEcoHyd(SEXP xSEXP, SEXP ySEXP, SEXP tSEXP, SEXP RSEXP, SEXP ETpSEXP, SEXP vtypeSEXP, SEXP soilparSEXP, SEXP s_initSEXP, SEXP fulldaySEXP, SEXP ZmeanSEXP, SEXP GWdepthsSEXP, SEXP GWdepths_prevSEXP, SEXP deltatSEXP, SEXP NXSEXP, SEXP NYSEXP) {
+NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in, CharacterVector vtype, List soilpar, NumericVector s_init, double fullday, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, NumericVector NX, NumericVector NY);
+RcppExport SEXP EcoHydro2D_WBEcoHyd(SEXP tSEXP, SEXP RSEXP, SEXP ET_inSEXP, SEXP vtypeSEXP, SEXP soilparSEXP, SEXP s_initSEXP, SEXP fulldaySEXP, SEXP ZmeanSEXP, SEXP GWdepthsSEXP, SEXP GWdepths_prevSEXP, SEXP deltatSEXP, SEXP NXSEXP, SEXP NYSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< int >::type x(xSEXP);
-    Rcpp::traits::input_parameter< int >::type y(ySEXP);
     Rcpp::traits::input_parameter< int >::type t(tSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type R(RSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type ETp(ETpSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ET_in(ET_inSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type vtype(vtypeSEXP);
     Rcpp::traits::input_parameter< List >::type soilpar(soilparSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_init(s_initSEXP);
@@ -221,7 +221,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type deltat(deltatSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type NX(NXSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type NY(NYSEXP);
-    __result = Rcpp::wrap(WBEcoHyd(x, y, t, R, ETp, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY));
+    __result = Rcpp::wrap(WBEcoHyd(t, R, ET_in, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY));
     return __result;
 END_RCPP
 }

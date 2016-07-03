@@ -13,7 +13,7 @@
 The DESCRIPTION file:
 \packageDESCRIPTION{EcoHydro2D}
 \packageIndices{EcoHydro2D}
-~~ An overview of how to use the package, including the most important functions ~~
+This package brings together the functions related to two dimensional ecohydrological modelling based on Vervoort and van der Zee (2012)
 }
 \author{
 \packageAuthor{EcoHydro2D}
@@ -21,14 +21,14 @@ The DESCRIPTION file:
 Maintainer: \packageMaintainer{EcoHydro2D}
 }
 \references{
-~~ Literature or other references for background information ~~
+Vervoort and van der Zee (2012)
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R ~~
-~~ documentation directory ~~
+%%~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R ~~
+%%~~ documentation directory ~~
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+%%~~ Optional links to other man pages, e.g. ~~
+%%~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
 %% ~~ simple examples of the most important functions ~~

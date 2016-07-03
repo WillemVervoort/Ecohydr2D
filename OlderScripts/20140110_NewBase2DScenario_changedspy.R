@@ -11,8 +11,7 @@ today <- format(Sys.Date(),"%Y%m%d")
 
 # In advance, define all parameters in gwt_input_parameters.r
 #edit(file="X:/vervoort/research/rcode/ecohydrology/2dmodelling/gwt_input_parameters.r")
-# source functions
-source("X:/vervoort/research/rcode/ecohydrology/ecohydrology2dmodelling/20130620_2dmodellingfunction.r")
+
 
 #### Read in the Rain data and climate data
 # adjusted WV 20120830
@@ -23,14 +22,14 @@ Rain <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"), Rain=Climate[,2]/10) 
 ETp <- data.frame(dates=as.Date(Climate[,1], "%d/%m/%Y"), ETp=rep(Climate[,5]/10))
 GWdata <- read.csv("20131213_YuleRiverGWdata.csv")
 
-xyplot(Rain~dates,data=Rain,type="h")
+#xyplot(Rain~dates,data=Rain,type="h")
 
 # adjusted WV 20120928 
 # daily streamflow
 Stream <- read.csv("20120928_yulerivlev.csv")
 # This is the righthand boundary condition
 head(Stream)
-xyplot(Stream$Height~as.Date(Stream$Date,"%d/%m/%Y"),type="l")
+#xyplot(Stream$Height~as.Date(Stream$Date,"%d/%m/%Y"),type="l")
 
 # There are missing data in the stream data
 # need to match the stream dates to the climate dates
@@ -71,11 +70,8 @@ veg[sample(1:length(veg),size=ceiling(0.3*length(veg)))] <-
 			"Bare"
 veggies <- c(rep("TreesDR",10), veg)
 soils <- "L Med Clay"
-sp <- Soil("Loamy Sand") #Soil("L Med Clay")
-#result <- big.fun(N=197,stype=soils, aqK_in = sp$K_s/100, vtype=veggies,Rain=Rain, 
- #        ETp=ETp,stream=Stream, gwheads = gw_in, Zmean = Zmean, 
-  #      today.m = today, fs = fs_veg)
-sp$spec_y <- 0.15
+# define the soil for the aquifer
+sp <- Soil_cpp("Loamy Sand") #Soil("L Med Clay")
 #
 # now includes separate K for aquifer (sand) based on Pfautsch et al.
 result <- big.fun(N=nrow(Rain),stype=soils, aqK_in = sp$K_s/100, 
@@ -83,7 +79,6 @@ result <- big.fun(N=nrow(Rain),stype=soils, aqK_in = sp$K_s/100,
                   ETp=ETp,stream=Stream.adj, gwheads = gw_in, Zmean = Zmean, 
                   today.m = today, fs = fs_veg)
 
-## More pretty plotting? example by Willem ####-------------------
 
 
 # run stackfun on the output file

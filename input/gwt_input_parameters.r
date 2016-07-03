@@ -1,4 +1,6 @@
-
+# ----------------
+# Grid
+# ---------------
 NX <- 42
 NY <- 1
 NRBL <- 2    #number of river blocks
@@ -6,8 +8,17 @@ DELX <- c(20,rep(10,10), rep(25,10), rep(50,10),rep(500,10),20)
 DELY <- 100   
 ITIM <- 1
 
+# Define slope grid
+dslope_x <- 0 # m difference in x-direction
+dslope_y <- 0 # m difference in y-direction
+# define the slopw
+slope <- slopefun(NX,NY,dslope_x,dslope_y)
+# ----------------------------
+
+# --------------------
+# Groundwater
+# --------------------
 # Depth of water table:
-#
 init_heads <- gwheads #meters
 bottom <- -25   #meters
 bottommatrix<-matrix(bottom,NX,NY)
@@ -15,13 +26,8 @@ bottommatrix<-matrix(bottom,NX,NY)
 
 GWthreshold<- 0.0 #m 
 DELTcrit<- 21   #days
+# -------------------
 
-q <- 1 #define some q value for stress
-
-# Define slope grid
-dslope_x <- 0 # m difference in x-direction
-dslope_y <- 0 # m difference in y-direction
-NRain<-nrow(Rain) # length Rain vector
 
 ########################
 #river: 
@@ -33,9 +39,6 @@ riverheads <- stream[,2] - 3  # water head river (m).
 #creates riverheads vector
 
 if(NRBL==0){hriver <- 0} # should have some value, otherwise: formula breaks off
-
-
-
 
 #alternative:river on all outside blocks. NOT IMPORTANT
 #boundaryriver <- function(NX, NY, criver, Ariver) {

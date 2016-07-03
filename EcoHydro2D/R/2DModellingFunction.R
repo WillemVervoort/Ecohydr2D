@@ -132,24 +132,22 @@ Gwt.fun <- function(t,last_t_heads, BC,
 # this needs definition of "full day"
 # +++++++++ end rainfall infiltration function
 
-source("UtilityFunctions.R")
-
-
-
 # +++++++++++++++++++++++++++++++++++++++++
 # we are running over i timesteps and over j landscape cells
 # GWthreshold = 0.0 m (set in gwt_input_parameters.txt)
 
-big.fun <- function(N, stype, vtype, aqK_in, aq_specy_in, 
+big.fun <- function(N, NX, NY, stype, vtype, aqK_in, aq_specy_in, 
                     Rain, ETp, stream, gwheads, Zmean,
-		rdir_in = "X:/vervoort/research/rcode/ecohydrology/2dmodelling",
+		rdir_in = "c:/users/rver4657/owncloud/ecohydrology2dmodellng",
 		today.m = today, 
-		fs=1, Res_in=100) {
+		fs=1, Res_in=100, slope_in) {
 #print(gwheads)
 
 # -----------------------------
 # Preliminaries
 # N: number of days for run
+# NX: size in the x direction
+# NY: size in the y direction
 # stype: soiltype from soilfunction.r
 # vtype: vector of vegetation types for vegfunction.r length no of cells
 # aqK_in and aq_specy_in s Aquifer K and sepcific yield
@@ -164,6 +162,7 @@ big.fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
 # Zmean is a scalar of vector (length NX) of optimal groundwater depths for vegetation
 # Zmean is in cm and positive (Can be -100*gwheads)
 # rdir_in is the R directory to read functions and scripts
+# slope_in is the input slopevector
 # --------------------------
 
 
@@ -185,9 +184,9 @@ big.fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
   finalN <- N #this will be overwritten when formula stops before N is reached  
   STOP <- FALSE
     # introduce slopevector
-	if(NY==1){  slopevector.m <- slope
+	if(NY==1){  slopevector.m <- slope_in
     			}else{
-    		slopevector.m<-matrixtovector(slope)  }
+    		slopevector.m<-matrixtovector(slope_in)  }
 
 # -------- end preliminaries ----------------------
 
@@ -223,19 +222,23 @@ while (STOP == FALSE) {
 # START OF THE LOOPS --------------------------#
 # run a loop through the days
 	for (t in 1:N) {
-			# define initial soil moisture
-		#	print(s_init) 
-		if (t == 1)	s_init <- rep(0.5,NX*NY)
-	  	# check the river level
+	  
+	  # Initialise
+		if (t == 1)	{
+		  # 1. define initial soil moisture
+		  s_init <- rep(0.5,NX*NY)
+  		# 2. initialise gwheads
+	   last_heads_in <- gwheads
+	    # 3. initialise recharge
+	   rech <- rep(0.0,NX)
+		} else {
+	    last_heads_in <- GW_store$heads[t-1,]
+	    rech <- GW_store$GWcum[t-1,]
+	  } 
+		# check the river level
 		if (stream[t,2] < 0.06) {
 			if (stream[t-1,2] >= 0.06 || t == 1) {
 				print("t = 1 or river dry")
-			  # initialise gwheads
-				if (t == 1) {last_heads_in <- gwheads} else {last_heads_in <- GW_store$heads[t-1,]} 
-#				print(last_heads_in)
-			  # initialise recharge
-				if (t == 1) rech <- rep(0.0,NX) else rech <- GW_store$GWcum[t-1,]
-               #  print(paste("Recharge=",rech))
 				# run gwt.exe function first time to
 				GW.out <- Gwt.fun(t, last_t_heads = last_heads_in, 
 					BC = gwheads[NX], first=T, 
@@ -261,15 +264,7 @@ while (STOP == FALSE) {
 			# check if first time after river level back up or first time
 			if (stream[t-1,2] < 0.06 || t == 1) {
 				# run gwt.exe function
-				if (t == 1) {
-					last_heads_in <- gwheads
-				} else {
-					last_heads_in <- GW_store$heads[t-1,]
-				}
-				#print("river full") 
-				#print(last_heads_in)
-				if (t == 1) rech <- rep(0.0,NX) else rech <- GW_store$GWcum[t-1,]
-		GW.out <- Gwt.fun(t,last_t_heads = last_heads_in, 
+    		GW.out <- Gwt.fun(t,last_t_heads = last_heads_in, 
 					first=T, BC = c(riverheads[t],gwheads[NX]),
 					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=rech, 
 					slopevector = slopevector.m,

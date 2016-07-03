@@ -6,6 +6,7 @@
 using namespace Rcpp;
 
 // first redefine vegpar
+// [[Rcpp::export]]
 List Veg_cpp(std::string vtype, List soilpar) {
   // general definitions
   double E_w = 0.01;
@@ -42,7 +43,7 @@ List Veg_cpp(std::string vtype, List soilpar) {
     // vegmodelling parameters taken out
     
   
-  if (vtype == "TreesDR") {
+  if (vtype == "TreesDR" || vtype == "Trees") {
      Zr = 100.0;
      delta = 0.2;
      psi_ss = -0.12; //Mpa Table 1, F_I & R-I 2004

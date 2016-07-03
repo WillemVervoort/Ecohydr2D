@@ -105,7 +105,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
 // this is in the middle part of the overall Bigfun
 
 // [[Rcpp::export]]
-NumericMatrix WBEcoHyd(int x, int y, int t, NumericVector R, NumericVector ETp,
+NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
                        CharacterVector vtype, List soilpar,
                        NumericVector s_init,
                        double fullday,
@@ -143,7 +143,7 @@ NumericMatrix WBEcoHyd(int x, int y, int t, NumericVector R, NumericVector ETp,
     // Call the vegpar function
     std::string veg_in = as<std::string>(vtype[j]);
     List vegpar = Veg_cpp(veg_in, soilpar);
-    vegpar["Ep"] = ETp[j];
+    vegpar["Ep"] = ET_in[j];
     // define soil and vegparameters
     double Zr = vegpar["Zr"];
     double n = soilpar["n"];

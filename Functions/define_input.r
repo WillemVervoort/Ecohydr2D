@@ -10,9 +10,9 @@ bottommatrix<-matrix(bottom,NX,NY)
 
 ## Write important data to file
 SaveParameterData <- function(name){
-Out<- cbind(NX,NY,NRBL,t(DELX),DELY,init_heads,bottom,GWthreshold,DELTcrit,dslope_x, dslope_y,
+  Out<- cbind(NX,NY,NRBL,t(DELX),DELY,init_heads,bottom,GWthreshold,DELTcrit,dslope_x, dslope_y,
     criver, Ariver, riverheads)
-write.table(Out,name,row.names=FALSE,col.names=TRUE,sep=",")
+  write.table(Out,name,row.names=FALSE,col.names=TRUE,sep=",")
 }
 
 matrixtovector<-function(inputmatrix){

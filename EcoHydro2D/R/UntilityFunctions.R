@@ -21,13 +21,12 @@ stackfun <- function(data,NX) { # this needs to be adapted relative to what you 
 #   source(paste(rdir,"soilfunction.r",sep="/"))
 #   source(paste(rdir,"vegfunction.r",sep="/"))
 # }
-read.fun1 <- function(rdir = rdir_in, stream.m = stream, gwheads.m = gwheads,
+read.fun1 <- function(input_dir=paste(getwd(),"input",sep="/"), stream.m = stream, gwheads.m = gwheads,
                       Res = NULL) {
   attach(list(gwheads=gwheads.m,stream=stream.m, RES= Res))
   
-  source(paste(rdir,"gwt_input_parameters.r",sep="/")) #You need to adjust values in here as well!!
-  source(paste(rdir,"Fluxfunctions2Dmodel.R",sep="/"))  #
-  source(paste(rdir,"define_input.r",sep="/"))      #also the parameters are called
+  source(paste(in_dir,"gwt_input_parameters.r",sep="/")) #You need to adjust values in here as well!!
+#  source(paste(rdir,"define_input.r",sep="/"))      #also the parameters are called
   
   # detach again to make sure there is no confusion
   detach(list(gwheads = gwheads.m, stream = stream.m, RES = Res))
@@ -89,27 +88,27 @@ vectortomatrix<-function(inputvector, Ncol){
   return(outputmatrix)
 }
 
-bottomvector<-matrixtovector(bottommatrix)
-
-if(NX==1){
-  widthxvector<-DELX
-  distancetoriver<-0
-}else{
-  if(length(DELX)==1){widthxvector<-matrix(DELX, 1, NX)
-  
-  }else{
-    widthxvector<-cbind(DELX)}
-  
-  distancetoriver<-vector(mode="numeric", length=NX)
-  distancetoriver[1]<- -0.5*widthxvector[1]
-  #    widthxvector[1]<- -widthxvector[1]*1/2
-  for(i in 2:NX){
-    distancetoriver[i]<-0.5*widthxvector[i]+0.5*widthxvector[i-1]+distancetoriver[i-1]}
-}
-distancetoriver[1]<-0
-
-# define widthxvector here when no constant width is used
-widthyvector<-matrix(DELY, 1, NY) # define widthyvector here when no constant width is used
+# bottomvector<-matrixtovector(bottommatrix)
+# 
+# if(NX==1){
+#   widthxvector<-DELX
+#   distancetoriver<-0
+# }else{
+#   if(length(DELX)==1){widthxvector<-matrix(DELX, 1, NX)
+#   
+#   }else{
+#     widthxvector<-cbind(DELX)}
+#   
+#   distancetoriver<-vector(mode="numeric", length=NX)
+#   distancetoriver[1]<- -0.5*widthxvector[1]
+#   #    widthxvector[1]<- -widthxvector[1]*1/2
+#   for(i in 2:NX){
+#     distancetoriver[i]<-0.5*widthxvector[i]+0.5*widthxvector[i-1]+distancetoriver[i-1]}
+# }
+# distancetoriver[1]<-0
+# 
+# # define widthxvector here when no constant width is used
+# widthyvector<-matrix(DELY, 1, NY) # define widthyvector here when no constant width is used
 
 define_gwt_gridinput <- function (NX, NY, NRBL, widthxvector, widthyvector, NB=NULL, XB1=NULL, YB1=NULL, XB2=NULL, YB2=NULL, XB3=NULL, YB3=NULL, XB4=NULL, YB4=NULL) {
   firstline <- c(NX,NY, NRBL)
@@ -174,15 +173,17 @@ define_gwt_riverinput <- function(NRBL,Ariver,criver,IXR,IXY) {
 }
 
 
-
-slope<-matrix(0,NY,NX)
-if(NY==1){slope<-seq(0,dslope_x,dslope_x/(NX-1))
-} else {
-  for(i in 1:NX){
-    for(j in 1:NY){
-      slope[j,i]=(i-1)*(dslope_x)/(NX-1)+(j-1)*(dslope_y)/(NY-1)
+slopefun <- function(NX,NY,dslope_x,dslope_y) {
+  slope<-matrix(0,NY,NX)
+  if(NY==1){slope<-seq(0,dslope_x,dslope_x/(NX-1))
+  } else {
+    for(i in 1:NX){
+      for(j in 1:NY){
+        slope[j,i]=(i-1)*(dslope_x)/(NX-1)+(j-1)*(dslope_y)/(NY-1)
+      }
     }
   }
+  return(slope)
 }
 
 

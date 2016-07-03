@@ -2,9 +2,11 @@
 \alias{E_Teuling_cpp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
+utitity function that calculates actual evaporation based on LAI and soil saturation.
 %%  ~~function to do ... ~~
 }
 \description{
+This function take LAI  and soil saturation and calculates the actual ET. This based on Teuling and Troch (2005). It is mostly an internal function but exported for testing reasons
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -14,9 +16,11 @@ E_Teuling_cpp(s, vegpar)
 \arguments{
   \item{s}{
 %%     ~~Describe \code{s} here~~
+soil saturation value (range 0 - 1)
 }
   \item{vegpar}{
 %%     ~~Describe \code{vegpar} here~~
+a list of vegetation parameters defined by Vegfun() or Vegfun_cpp(). The important ones here are: LAI, Ep, C_T and fr
 }
 }
 \details{
@@ -28,12 +32,14 @@ E_Teuling_cpp(s, vegpar)
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
+a single value, which is the value of the actual evaporation at that saturation level
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
 \author{
 %%  ~~who you are~~
+R. Willem Vervoort willemvervoort@gmail.com
 }
 \note{
 %%  ~~further notes~~
@@ -43,17 +49,14 @@ E_Teuling_cpp(s, vegpar)
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{?Vegpar_cpp}, \link{?Soilpar_cpp}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (s, vegpar) 
-.Primitive(".Call")(<pointer: (nil)>, s, vegpar)
+soilpar <- Soil_cpp("S Clay Loam")
+vegpar <- Veg_cpp("Trees",soilpar)
+E_Teuling_cpp(0.5,vegpar)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ methods }% use one of  RShowDoc("KEYWORDS")
+\keyword{ function }% __ONLY ONE__ keyword per line
