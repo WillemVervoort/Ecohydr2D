@@ -57,7 +57,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
     loss = FB_new_cpp(last_t_soil_sat, 
                       soilpar_in, vegpar_in,
                       Z_in, Zmean_in, Z_prev);
-    //Rcpp::Rcout << loss[2]
+  //  Rcpp::Rcout << "loss0 = " << loss[0];
   } else {
     loss = rho_new_cpp(last_t_soil_sat, Z_in,
                        soilpar_in, vegpar_in,
@@ -66,6 +66,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   // update the water balance
   // ss.t is temporary ss
   double ss_t = last_t_soil_sat + Phi - loss[0]/(n*Zr)*intincr;
+  //Rcpp::Rcout << ss_t;
   
   // build in safety if capillary flux fills soil with dynamic water table
   if (ss_t > 1) {  // very wet conditions
@@ -73,7 +74,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
     qcap = (loss[3] - (ss_t - 1)*n*Zr/intincr)*intincr;
   } else { // normal conditions
     soil_sat = ss_t;
-    qcap = loss[3]*(1/intincr);
+    qcap = loss[3]*intincr;
   }
   static_stress = zeta(soil_sat, ss, sw, q);
   Tg = loss[2]*intincr;
@@ -113,7 +114,7 @@ NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
                        NumericVector GWdepths,
                        NumericVector GWdepths_prev,
                        int deltat,
-                       NumericVector NX, NumericVector NY){
+                       int NX, int NY){
   
   // both R and Etp are single vectors of the rainfall and the ETpotential
   // vtype is a vector of vegetation types along the grid
@@ -126,16 +127,16 @@ NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
   // GWdepths_prev are the previous gw depths for each gridcell (at t-1)
   
   // define variables
-  int m = NX.size()*NY.size();
+  int m = NX*NY;
   double R_in = 0.0;
   
-  // storage output vectors
-  // grid vectors
-  NumericVector s_g(m), qcap_g(m), Tgw_g(m), Tsoil_g(m), Ttotal_g(m), Leakage_g(m);
-  NumericVector GWrech_g(m), smloss_g(m), static_stress_g(m), surfoff_g(m);
+  // storage output 
   //Matrices
-  NumericMatrix Storage_Subday(12,10);
-  // this only works as long as NX = 1
+  // this first matrix stores each output (10) from Waterbalancefunction 
+  // for single gridcell, but for all sub timesteps
+  NumericMatrix Storage_Subday(10,deltat);
+  // This stores each daily average output (10 in rows) 
+  // for each day for all gridcells
   NumericMatrix Storage_Grid(10,m);
   
   // run through grid
@@ -150,31 +151,34 @@ NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
     // Now run integration loop
     for (int p = 0;p < deltat;p++) {
       if (p == 0) {
-        R_in = R[t]/(n*Zr);
+        // needs to be t - 1 as counters in C++ start at 0
+        R_in = R(t-1)/(n*Zr);
       }
-      Rcpp::Rcout << "R_in =" << R_in; 
+      //Rcpp::Rcout << "R_in =" << R_in; 
       // run the water balance
-      double s_old = s_init[j];
-      if (p > 1 ) s_old = Storage_Subday((p-1),1);
+      double s_old = s_init(j);
+      if (p > 0 ) s_old = Storage_Subday((p-1),0);
       //     // Storage_Subday is not defined
       List Water_out = WB_fun_cpp(vegpar, R_in, s_old,
-                                  soilpar, Zmean[j], deltat, GWdepths_prev[j], GWdepths[j]);
-      
+                                  soilpar, Zmean(j), deltat, 
+                                  GWdepths_prev(j), GWdepths(j));
       //Write water balance list output to subdaily vector
-      int xsize =  Storage_Subday.ncol();
+      int xsize =  Storage_Subday.nrow();
       for (int k = 0; k < xsize; k++) {
-        Storage_Subday(p,k) = Rcpp::as<double>(Water_out(k));
+        Storage_Subday(k,p) = Rcpp::as<double>(Water_out(k));
       }
       //
       // store s_init for gridcell till next day
-      if (p == 12) s_init(j) = Storage_Subday(p,1);
+      if (p == 11) {s_init(j) = Storage_Subday(0,p);
+      //Rcpp::Rcout << Storage_Subday(0,p);
+      }
     } // close p loop
     // recalculate to daily output and write away
     // produce different output, produce daily values for each grid cell
-    int kk = Storage_Grid.ncol();
+    int kk = Storage_Grid.nrow();
     for (int k = 0; k < kk; k++) {
-      Storage_Grid(j,k) = sum(Storage_Subday(_,k));
-      if (k > 0) Storage_Grid(j,k) = mean(Storage_Subday(_,k));
+      Storage_Grid(k,j) = sum(Storage_Subday(k,_));
+      if (k == 0 || k == 8) Storage_Grid(k,j) = mean(Storage_Subday(k,_));
     }
     
   } // close j loop

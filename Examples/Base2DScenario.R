@@ -4,22 +4,25 @@
 # This is the base case without rainfall as suggested by Sjoerd
 require(lattice)
 
-setwd("x:/vervoort/research/ecohydrology/2dmodelling")
+require(EcoHydro2D)
+
+#setwd("x:/vervoort/research/ecohydrology/2dmodelling")
+setwd("c:/users/rver4657/owncloud/ecohydrology2dmodellng/examples")
+
 today <- format(Sys.Date(),"%Y%m%d")
 
 # read in all data
-load("2dmodellingBaseData/Allinput.rdata")
+load("Allinput.rdata")
 
 # In advance, define all parameters in gwt_input_parameters.r
 #edit(file="X:/vervoort/research/rcode/ecohydrology/2dmodelling/gwt_input_parameters.r")
-# source functions
-source("X:/vervoort/research/rcode/ecohydrology/ecohydrology2dmodelling/functions/2dmodellingfunction.r")
 
 # Now run a few different simulations
 # define initial gwheads and Zmean
 #load("finalgwlevel.rdata")
 #gw_in <- c(finalgw[1:(NX-1)],-12)
-gw_in <-  GWdata[1,2] + 0.5 - 0.048*(1:42)#seq(-8,-10,length=42) #finalgw 
+# gw_in needs to be positive and in cm
+gw_in <-  (GWdata[1,2] + 0.5 - 0.048*(1:42))#seq(-8,-10,length=42) #finalgw 
 Zmean <- rep(600,42) #gw_in*-100 # could also try Zmean <- 500
 fs_veg <- 0.25 # this is the spreading of the root water uptake around z_mean
 
@@ -33,15 +36,15 @@ veg[sample(1:length(veg),size=ceiling(0.3*length(veg)))] <-
 # define the trees section
 veggies <- c(rep("TreesDR",10), veg)
 soils <- "L Med Clay"
-sp <- Soil(soils)
+sp <- Soil_cpp(soils)
 # define spec_y separately
 sp$spec_y <- 0.15
 #
 # now includes separate K for aquifer (sand) based on Pfautsch et al.
-result <- big.fun(N=nrow(Rain),stype=soils, aqK_in = sp$K_s/100, 
-                  aq_specy_in  = sp$spec_y,vtype=veggies,Rain=Rain, 
-                  ETp=ETp,stream=Stream.adj, gwheads = gw_in, Zmean = Zmean, 
-                  today.m = today, fs = fs_veg)
+system.time({result <- big.fun(N=nrow(Rain),stype=soils,vtype=veggies, aqK_in = sp$K_s/100, 
+                  aq_specy_in  = sp$spec_y,Rain=Rain, 
+                  ETp=ETp,stream=Stream, gwheads = gw_in, Zmean = Zmean, 
+                  today.m = today, fs = fs_veg)})
 
 ## More pretty plotting? example by Willem ####-------------------
 

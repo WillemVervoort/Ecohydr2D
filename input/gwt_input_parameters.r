@@ -7,7 +7,7 @@ NRBL <- 2    #number of river blocks
 DELX <- c(20,rep(10,10), rep(25,10), rep(50,10),rep(500,10),20)
 DELY <- 100   
 ITIM <- 1
-
+distancetoriver=c(rep(0,NRBL),cumsum(DELX[NRBL:length(DELX)]))
 # Define slope grid
 dslope_x <- 0 # m difference in x-direction
 dslope_y <- 0 # m difference in y-direction
@@ -22,6 +22,7 @@ slope <- slopefun(NX,NY,dslope_x,dslope_y)
 init_heads <- gwheads #meters
 bottom <- -25   #meters
 bottommatrix<-matrix(bottom,NX,NY)
+bottomvector<-matrixtovector(bottommatrix)
 
 
 GWthreshold<- 0.0 #m 
@@ -34,7 +35,7 @@ DELTcrit<- 21   #days
 ########################
 criver <- c(RES,0.1) #resistance (m) # WV says Increase this to limit leakage from river
 Ariver <- rep(100,NRBL) # river area (m^2) # this is a guess
-riverheads <- stream[,2] - 3  # water head river (m). 
+riverheads <- (stream[,2] - 3)  # water head river (m). 
 # This assumes no overbank flows in the period. 
 #creates riverheads vector
 

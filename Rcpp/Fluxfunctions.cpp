@@ -1,7 +1,5 @@
-#ifndef __Fluxfunctions__
-#define __Fluxfunctions__
-
-
+// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(RcppNumerical)]]
 #include <Rcpp.h>
 #include <RcppNumerical.h>
 using namespace Rcpp;
@@ -308,13 +306,12 @@ NumericVector FB_new_cpp(double s,List soilpar_in,List vegpar_in, double Zfb,
   return out;
 }
 
-// /*** R
-// sourceCpp("soilfun.cpp")
-// sourceCpp("Vegfun.cpp")
-// sourceCpp("RootFunctions.cpp")
-// # soilpar = Soil_cpp("M Clay")
-// # vegpar = Veg_cpp("TreesDR", soilpar)
-// # FB_new_cpp(0.4,soilpar,vegpar,200,190,190)
-// */
+/*** R
+sourceCpp("soilfun.cpp")
+sourceCpp("Vegfun.cpp")
+sourceCpp("RootFunctions.cpp")
+ soilpar = Soil_cpp("L Med Clay")
+ vegpar = Veg_cpp("TreesDR", soilpar)
+ FB_new_cpp(0.5,soilpar,vegpar,-6.7,6,-6.75)
+*/
 
-#endif //__Fluxfunctions__

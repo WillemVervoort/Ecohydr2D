@@ -21,11 +21,11 @@ stackfun <- function(data,NX) { # this needs to be adapted relative to what you 
 #   source(paste(rdir,"soilfunction.r",sep="/"))
 #   source(paste(rdir,"vegfunction.r",sep="/"))
 # }
-read.fun1 <- function(input_dir=paste(getwd(),"input",sep="/"), stream.m = stream, gwheads.m = gwheads,
+read.fun1 <- function(input_dir, stream.m = stream, gwheads.m = gwheads,
                       Res = NULL) {
   attach(list(gwheads=gwheads.m,stream=stream.m, RES= Res))
   
-  source(paste(in_dir,"gwt_input_parameters.r",sep="/")) #You need to adjust values in here as well!!
+  source(paste(input_dir,"gwt_input_parameters.r",sep="/")) #You need to adjust values in here as well!!
 #  source(paste(rdir,"define_input.r",sep="/"))      #also the parameters are called
   
   # detach again to make sure there is no confusion
@@ -45,6 +45,20 @@ list.write.fun <- function(r,output,input,t) {
   return(output)
   #	}
 }
+
+list.write.fun2 <- function(output,input,t) {
+  
+  # input and output are a dataframe and a list
+  # i is the time counter
+  # r is a counter along the columns of inputs
+  for (r in 1:nrow(input)) {
+    output[[names(output)[r+1]]][t,] <- input[r,]
+  }
+  #if (r == length(output)-1){
+  return(output)
+  #	}
+}
+
 
 # test code
 # input <- matrix(seq(1,12),ncol=2,nrow=6)
@@ -88,7 +102,6 @@ vectortomatrix<-function(inputvector, Ncol){
   return(outputmatrix)
 }
 
-# bottomvector<-matrixtovector(bottommatrix)
 # 
 # if(NX==1){
 #   widthxvector<-DELX
