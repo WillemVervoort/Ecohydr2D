@@ -4,12 +4,10 @@
 NX <- 42
 NY <- 1
 NRBL <- 2    #number of river blocks
-IXR = c(1,42) # location river blocks in X and Y dir
-IYR = c(1,1)
 DELX <- c(20,rep(10,10), rep(25,10), rep(50,10),rep(500,10),20)
 DELY <- 100   
 ITIM <- 1
-distancetoriver=c(0,cumsum(DELX[1:length(DELX)]))
+distancetoriver=c(rep(0,NRBL),cumsum(DELX[NRBL:length(DELX)]))
 # Define slope grid
 dslope_x <- 0 # m difference in x-direction
 dslope_y <- 0 # m difference in y-direction
@@ -26,15 +24,18 @@ bottom <- -25   #meters
 bottommatrix<-matrix(bottom,NX,NY)
 bottomvector<-matrixtovector(bottommatrix)
 
+
+GWthreshold<- 0.0 #m 
+DELTcrit<- 21   #days
 # -------------------
 
 
 ########################
 #river: 
 ########################
-criver <- c(RES,0.001) #resistance (m) # WV says Increase this to limit leakage from river
+criver <- c(RES,0.01) #resistance (m) # WV says Increase this to limit leakage from river
 Ariver <- rep(100,NRBL) # river area (m^2) # this is a guess
-riverheads <- (stream[,2] - 3)  # water head river (m).
+riverheads <- (stream[,2] - 3)  # water head river (m). 
 # This assumes no overbank flows in the period. 
 #creates riverheads vector
 
@@ -108,6 +109,8 @@ if(NRBL==0){hriver <- 0} # should have some value, otherwise: formula breaks off
 #  temp[as.numeric(temp[,1])==i,2] <- (0.5/e_star)*Rs[i,2]
 #}
 #I_m <- as.numeric(temp[1:nrow(Rain),2])
+
+
 
 
 

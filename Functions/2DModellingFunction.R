@@ -229,7 +229,7 @@ while (STOP == FALSE) {
 	  	# check the river level
 		if (stream[t,2] < 0.06) {
 			if (stream[t-1,2] >= 0.06 || t == 1) {
-				print("t = 1 or river dry")
+				#print("t = 1 or river dry")
 			  # initialise gwheads
 				if (t == 1) {last_heads_in <- gwheads} else {last_heads_in <- GW_store$heads[t-1,]} 
 #				print(last_heads_in)
@@ -248,7 +248,7 @@ while (STOP == FALSE) {
 				# reset DELT (timestep)
 				DELT <- GW.out$DELT
 			} else { #this means river is dry, but last step also dry
-				print("t1 > 1")
+				#print("t1 > 1")
 				#print(GW_store$GWcum[t-1,])
 				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
 					first=F, BC = gwheads[NX], soilpar.m=soilpar_in, 
@@ -287,7 +287,7 @@ while (STOP == FALSE) {
 			} # Close if loop whether first time run
 		} # close riverlevel loop
 				# reset DELT
-				print(paste("gwt.exe is run and DELT =",DELT))
+				#print(paste("gwt.exe is run and DELT =",DELT))
 			#	DELT <- GW.out$DELT
 				GW.out$out$Gwcum <- rep(0,NX)
 			#	print(GW.out$out$Gwcum)
@@ -344,10 +344,10 @@ STOP <- TRUE
 # -------------------------------------
 # write away values to some files (WB etc)
 Storage.out <- do.call(cbind,Storage_day)
-write.csv(Storage.out,paste(NameRun,"DailyOutput_table.csv",sep="_"),
+write.csv(Storage.out,paste("output/",NameRun,"_DailyOutput_table.csv",sep=""),
 		row.names=FALSE)
 GWstore.out <- do.call(cbind,GW_store)
-write.csv(GWstore.out,paste(NameRun,"GWOutput_table.csv",sep="_"),
+write.csv(GWstore.out,paste("output/",NameRun,"_GWOutput_table.csv",sep=""),
 		row.names=FALSE)
 
 # Create a water balance table
@@ -357,7 +357,7 @@ Wb[c(1:42,((8*42):((9*42)-1)))] <-
 	apply(Storage.out,2,mean)[c(1:42,((8*42):((9*42)-1)))]
 #print(Wb)
 
-write.table(Wb,paste(NameRun,"Output_WB_table.csv",sep="_"),row.names=FALSE,
+write.table(Wb,paste("output/",NameRun,"_Output_WB_table.csv",sep=""),row.names=FALSE,
     col.names=TRUE,sep=",")
 
 # Create output out of function

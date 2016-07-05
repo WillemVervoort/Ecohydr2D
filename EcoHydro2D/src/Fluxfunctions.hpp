@@ -99,8 +99,8 @@ NumericVector m_fun(List vegpar_i, List soilpar_i, double Z_in, double Gin) {
 
 // rho_new_1
 // [[Rcpp::export]]
-NumericVector rho_new_cpp(double s, double ZZ, List soilpar, List vegpar,
-                        double Z_mean, double Z_prev) {
+NumericVector rho_new_cpp(double s,  List soilpar, List vegpar,
+                          double ZZ,double Z_mean, double Z_prev) {
   // define variables
   double Zr = vegpar["Zr"];
   double ss = vegpar["s_star"];
@@ -114,46 +114,61 @@ NumericVector rho_new_cpp(double s, double ZZ, List soilpar, List vegpar,
   double G1 = G_cpp(b,hb,(ZZ-Zr));
   // calculate parameters
   NumericVector m_values = m_fun(vegpar, soilpar, ZZ, G1);
-  double E_max = E_Teuling_cpp(s=1,vegpar);
+  double E_max = E_Teuling_cpp(1,vegpar);
   double eta = E_max/(n*Zr);
   double Q = 0.0;
   double E = 0.0;
   
+  // define s_cr: s-critical
+  double s_cr = m_values[2]/eta*(ss - sw) + sw;
+  
+  // Rcpp::Rcout << s_cr << std::endl;
+  
+  
   // Now calculate the soil moisture
   if (s > s_lim) {
-    Q = m_values[0]*(exp(beta*(s - s_lim))-1);
+    Q = m_values[0]*(std::exp(beta*(s - s_lim))-1);
     E = eta;
-  }
-  if (m_values[1] < eta) {
-    // define s_cr: s-critical
-    double s_cr = m_values[3]/eta*(ss - sw) + sw;
-    
-    if (s < s_cr) {
-      NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G_cpp(b,hb,(Z_prev-Zr)));
-      //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
-      E = 0.0;  
-      Q = -(m_values[2]*((s_cr-sw)/(ss-sw))-m_values_prev[2]*((s-sw)/(ss-sw)));
-    }
-    if (s > s_cr && s <= ss)
-    {
-      E = eta*((s-s_cr)/(ss-s_cr));
-      Q = -m_values[2]*((s-s_cr)/(ss - s_cr));
+    //Rcpp::Rcout << s << std::endl;
+    //Rcpp::Rcout << Q << std::endl;
+  } else {
+    if (m_values[1] < eta) {
+      
+      if (s < s_cr) {
+        NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G_cpp(b,hb,(Z_prev-Zr)));
+        //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
+        E = 0.0;  
+        Q = -(m_values[2]*((s_cr-sw)/(ss-sw))-m_values_prev[2]*((s-sw)/(ss-sw)));
+        //Rcpp::Rcout << s << std::endl;
+        //Rcpp::Rcout << Q << std::endl;
+      }
+      if (s > s_cr && s <= ss)
+      {
+        E = eta*((s-s_cr)/(ss-s_cr));
+        Q = -m_values[2]*((s-s_cr)/(ss - s_cr));
+        //Rcpp::Rcout << s << std::endl;
+        //Rcpp::Rcout << Q << std::endl;
+      }
+      if (s > ss && s <= s_lim) {
+        Q = -m_values[1]*(1-std::exp(beta*(s-s_lim)));
+        E = eta;
+        //Rcpp::Rcout << s << std::endl;
+        //Rcpp::Rcout << Q << std::endl;
+      }
     } else {
       if (s > ss && s <= s_lim) {
-        Q = -m_values[1]*(1-exp(beta*(s-s_lim)));
         E = eta;
+        Q = -m_values[1]*exp(beta*(s-s_lim));
+        //Rcpp::Rcout << s << std::endl;
+        //Rcpp::Rcout << Q << std::endl;
+      } else {    // again, if GW table rises: E=0 and qcap =difference qcap and old transpiration
+        NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G_cpp(b,hb,(Z_prev-Zr)));
+        //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
+        E = 0.0;  
+        Q = -(m_values[2]*((s_cr-sw)/(ss-sw))-m_values_prev[2]*((s-sw)/(ss-sw)));
+        // Rcpp::Rcout << s << std::endl;
+        //Rcpp::Rcout << Q<< std::endl;
       }
-    }
-  } else {
-    if (s > ss && s <= s_lim) {
-      E = eta;
-      Q = -m_values[1]*exp(beta*(s-s_lim));
-    } else {    // again, if GW table rises: E=0 and qcap =difference qcap and old transpiration
-      double s_cr = m_values[2]/eta*(ss - sw) + sw;
-      NumericVector m_values_prev = m_fun(vegpar, soilpar, Z_prev, G_cpp(b,hb,(Z_prev-Zr)));
-      //double s_cr_prev = m_values_prev[3]/eta*(ss - sw) + sw;
-      E = 0.0;  
-      Q = -(m_values[2]*((s_cr-sw)/(ss-sw))-m_values_prev[2]*((s-sw)/(ss-sw)));
     }
   }
   double Q_out = Q*(n*Zr);   

@@ -25,8 +25,8 @@ m_fun <- function(vegpar_i, soilpar_i, Z_in, Gin) {
     .Call('EcoHydro2D_m_fun', PACKAGE = 'EcoHydro2D', vegpar_i, soilpar_i, Z_in, Gin)
 }
 
-rho_new_cpp <- function(s, ZZ, soilpar, vegpar, Z_mean, Z_prev) {
-    .Call('EcoHydro2D_rho_new_cpp', PACKAGE = 'EcoHydro2D', s, ZZ, soilpar, vegpar, Z_mean, Z_prev)
+rho_new_cpp <- function(s, soilpar, vegpar, ZZ, Z_mean, Z_prev) {
+    .Call('EcoHydro2D_rho_new_cpp', PACKAGE = 'EcoHydro2D', s, soilpar, vegpar, ZZ, Z_mean, Z_prev)
 }
 
 Fun_E_cpp <- function(s, Z, soilpar, vegpar) {

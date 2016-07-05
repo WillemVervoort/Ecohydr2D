@@ -2,8 +2,9 @@
 
 # Do a stack operation, Joep actually wrote a function for this
 stackfun <- function(data,NX) { # this needs to be adapted relative to what you want
-  df <- data.frame(days=rep(data$id,NX), Rain=rep(data$Rain,NX),
-                   loc=rep(data$x,each=length(data$id)),
+    #browser()
+    df <- data.frame(days=rep(data$id,NX), Rain=rep(data$Rain,NX),
+                   loc=rep(data$x[(length(data$x)-NX+1):length(data$x)],each=length(data$id)),
                    River=rep(data$Stream,NX), 
                    Ts = stack(as.data.frame(data$Tsoil[,1:NX]))[,1],
                    Tg = stack(as.data.frame(data$Tgw[,1:NX]))[,1],
@@ -123,7 +124,10 @@ vectortomatrix<-function(inputvector, Ncol){
 # # define widthxvector here when no constant width is used
 # widthyvector<-matrix(DELY, 1, NY) # define widthyvector here when no constant width is used
 
-define_gwt_gridinput <- function (NX, NY, NRBL, widthxvector, widthyvector, NB=NULL, XB1=NULL, YB1=NULL, XB2=NULL, YB2=NULL, XB3=NULL, YB3=NULL, XB4=NULL, YB4=NULL) {
+define_gwt_gridinput <- function (NX, NY, NRBL, 
+                                widthxvector, widthyvector, NB=NULL, XB1=NULL,
+                                YB1=NULL, XB2=NULL, YB2=NULL, XB3=NULL, 
+                                YB3=NULL, XB4=NULL, YB4=NULL) {
   firstline <- c(NX,NY, NRBL)
   fourthline <- NB
   rest <- cbind(c(XB1,XB2,XB3,XB4),c(YB1,YB2,YB3,YB4))
@@ -175,13 +179,13 @@ define_gwt_hydroinput <- function (headvector, bottomvector,ksat,spec_y) {
 #define_gwt_timestepinput(ITIM, DELT, RECH)
 
 
-define_gwt_riverinput <- function(NRBL,Ariver,criver,IXR,IXY) {
-  rivermatrix <- matrix(0,NRBL,4) 
-  rivermatrix[,3] <- ifelse(length(Ariver==1),rep(Ariver,NRBL),Ariver)
-  rivermatrix[,4] <- ifelse(length(criver==1),rep(criver,NRBL),criver)
-  #coordinates:
-  rivermatrix[,1] <- IXR
-  rivermatrix[,2] <- IXY
+define_gwt_riverinput <- function(NRBL,Ariver,criver,IXR,IYR) {
+    rivermatrix <- matrix(0,NRBL,4) 
+    rivermatrix[,3] <- Ariver
+    rivermatrix[,4] <- criver
+    #coordinates:
+    rivermatrix[,1] <- IXR
+    rivermatrix[,2] <- IYR
   write.table(rivermatrix,"gwt_riverinput", row.names=FALSE,col.names=FALSE,sep=",")
 }
 

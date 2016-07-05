@@ -87,18 +87,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // rho_new_cpp
-NumericVector rho_new_cpp(double s, double ZZ, List soilpar, List vegpar, double Z_mean, double Z_prev);
-RcppExport SEXP EcoHydro2D_rho_new_cpp(SEXP sSEXP, SEXP ZZSEXP, SEXP soilparSEXP, SEXP vegparSEXP, SEXP Z_meanSEXP, SEXP Z_prevSEXP) {
+NumericVector rho_new_cpp(double s, List soilpar, List vegpar, double ZZ, double Z_mean, double Z_prev);
+RcppExport SEXP EcoHydro2D_rho_new_cpp(SEXP sSEXP, SEXP soilparSEXP, SEXP vegparSEXP, SEXP ZZSEXP, SEXP Z_meanSEXP, SEXP Z_prevSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    Rcpp::traits::input_parameter< double >::type ZZ(ZZSEXP);
     Rcpp::traits::input_parameter< List >::type soilpar(soilparSEXP);
     Rcpp::traits::input_parameter< List >::type vegpar(vegparSEXP);
+    Rcpp::traits::input_parameter< double >::type ZZ(ZZSEXP);
     Rcpp::traits::input_parameter< double >::type Z_mean(Z_meanSEXP);
     Rcpp::traits::input_parameter< double >::type Z_prev(Z_prevSEXP);
-    __result = Rcpp::wrap(rho_new_cpp(s, ZZ, soilpar, vegpar, Z_mean, Z_prev));
+    __result = Rcpp::wrap(rho_new_cpp(s, soilpar, vegpar, ZZ, Z_mean, Z_prev));
     return __result;
 END_RCPP
 }
@@ -203,14 +203,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // WBEcoHyd
-NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in, CharacterVector vtype, List soilpar, NumericVector s_init, double fullday, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, int NX, int NY);
+NumericMatrix WBEcoHyd(int t, double R, double ET_in, CharacterVector vtype, List soilpar, NumericVector s_init, double fullday, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, int NX, int NY);
 RcppExport SEXP EcoHydro2D_WBEcoHyd(SEXP tSEXP, SEXP RSEXP, SEXP ET_inSEXP, SEXP vtypeSEXP, SEXP soilparSEXP, SEXP s_initSEXP, SEXP fulldaySEXP, SEXP ZmeanSEXP, SEXP GWdepthsSEXP, SEXP GWdepths_prevSEXP, SEXP deltatSEXP, SEXP NXSEXP, SEXP NYSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< int >::type t(tSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type R(RSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type ET_in(ET_inSEXP);
+    Rcpp::traits::input_parameter< double >::type R(RSEXP);
+    Rcpp::traits::input_parameter< double >::type ET_in(ET_inSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type vtype(vtypeSEXP);
     Rcpp::traits::input_parameter< List >::type soilpar(soilparSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_init(s_initSEXP);

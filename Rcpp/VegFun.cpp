@@ -2,6 +2,7 @@
 using namespace Rcpp;
 
 // first redefine vegpar
+// [[Rcpp::export]]
 List Veg_cpp(std::string vtype, List soilpar) {
   // general definitions
   double E_w = 0.01;

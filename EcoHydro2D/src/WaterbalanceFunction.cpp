@@ -45,28 +45,32 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   // Change Rainfall into infiltration
   double Phi = In;
   double surfoff = 0.0;
-  double intincr = 1/deltat;
+  double incr = deltat;
+  float intincr = 1/incr;
+  //Rcpp::Rcout << "rest" << intincr << std::endl;
+  
   // check if soil bucket full, create runoff
   if(Phi > (1 - last_t_soil_sat)){
     Phi = 1 - last_t_soil_sat;
     surfoff = (In - Phi)*n*Zr;
   } 
+  //Rcpp::Rcout << "Phi" << Phi << std::endl;
   NumericVector loss(5); 
   // Call the loss model
   if (funswitch==TRUE) {
     loss = FB_new_cpp(last_t_soil_sat, 
                       soilpar_in, vegpar_in,
                       Z_in, Zmean_in, Z_prev);
-  //  Rcpp::Rcout << "loss0 = " << loss[0];
+   // Rcpp::Rcout << "loss0 = " << loss[0] << std::endl;
   } else {
-    loss = rho_new_cpp(last_t_soil_sat, Z_in,
+    loss = rho_new_cpp(last_t_soil_sat, 
                        soilpar_in, vegpar_in,
-                       Zmean_in, Z_prev);
+                       Z_in,Zmean_in, Z_prev);
   }
   // update the water balance
   // ss.t is temporary ss
   double ss_t = last_t_soil_sat + Phi - loss[0]/(n*Zr)*intincr;
-  //Rcpp::Rcout << ss_t;
+  //Rcpp::Rcout << "ss_t" << ss_t << std::endl;
   
   // build in safety if capillary flux fills soil with dynamic water table
   if (ss_t > 1) {  // very wet conditions
@@ -76,6 +80,8 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
     soil_sat = ss_t;
     qcap = loss[3]*intincr;
   }
+//Rcpp::Rcout << "soil_sat" << soil_sat << std::endl;
+  
   static_stress = zeta(soil_sat, ss, sw, q);
   Tg = loss[2]*intincr;
   // Rcpp::Rcout << loss[2];
@@ -86,8 +92,8 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   } 
   //increase with difference between originally calculated and new (pot.reduced) capillary flux
   smloss = (loss[0]*intincr  - (qcap - loss[3]*intincr)); 
-  GWrech = Leakage-loss[2]*intincr-qcap;
-  //Rcpp::Rcout << qcap;
+  GWrech = Leakage-Tg-qcap;
+  //Rcpp::Rcout << GWrech << std::endl;
   List out = Rcpp::List::create(Rcpp::Named("s") = soil_sat,
                                 Rcpp::Named("qcap") = qcap, 
                                 Rcpp::Named("Tgw") = Tg, 
@@ -106,7 +112,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
 // this is in the middle part of the overall Bigfun
 
 // [[Rcpp::export]]
-NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
+NumericMatrix WBEcoHyd(int t, double R, double ET_in,
                        CharacterVector vtype, List soilpar,
                        NumericVector s_init,
                        double fullday,
@@ -144,20 +150,21 @@ NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
     // Call the vegpar function
     std::string veg_in = as<std::string>(vtype[j]);
     List vegpar = Veg_cpp(veg_in, soilpar);
-    vegpar["Ep"] = ET_in[j];
+    vegpar["Ep"] = ET_in;
     // define soil and vegparameters
     double Zr = vegpar["Zr"];
     double n = soilpar["n"];
     // Now run integration loop
+    double s_old = s_init(j);
     for (int p = 0;p < deltat;p++) {
       if (p == 0) {
         // needs to be t - 1 as counters in C++ start at 0
-        R_in = R(t-1)/(n*Zr);
+        R_in = R/(n*Zr);
       }
-      //Rcpp::Rcout << "R_in =" << R_in; 
       // run the water balance
-      double s_old = s_init(j);
-      if (p > 0 ) s_old = Storage_Subday((p-1),0);
+      if (p > 0 ) s_old = Storage_Subday(0,(p-1));
+      //Rcpp::Rcout << s_old << std::endl; 
+      
       //     // Storage_Subday is not defined
       List Water_out = WB_fun_cpp(vegpar, R_in, s_old,
                                   soilpar, Zmean(j), deltat, 
@@ -167,10 +174,13 @@ NumericMatrix WBEcoHyd(int t, NumericVector R, NumericVector ET_in,
       for (int k = 0; k < xsize; k++) {
         Storage_Subday(k,p) = Rcpp::as<double>(Water_out(k));
       }
+//       if (t > 190 & t < 192) {
+          // Rcpp::Rcout << p << std::endl;
+//       }
       //
       // store s_init for gridcell till next day
       if (p == 11) {s_init(j) = Storage_Subday(0,p);
-      //Rcpp::Rcout << Storage_Subday(0,p);
+      //
       }
     } // close p loop
     // recalculate to daily output and write away
