@@ -35,7 +35,7 @@ DELTcrit<- 21   #days
 ########################
 criver <- c(RES,0.01) #resistance (m) # WV says Increase this to limit leakage from river
 Ariver <- rep(100,NRBL) # river area (m^2) # this is a guess
-riverheads <- (stream[,2] - 3)  # water head river (m). 
+riverheads <- Stream0[,2]  # water head river (m). 
 # This assumes no overbank flows in the period. 
 #creates riverheads vector
 
@@ -109,6 +109,9 @@ if(NRBL==0){hriver <- 0} # should have some value, otherwise: formula breaks off
 #  temp[as.numeric(temp[,1])==i,2] <- (0.5/e_star)*Rs[i,2]
 #}
 #I_m <- as.numeric(temp[1:nrow(Rain),2])
+
+
+
 
 
 

@@ -7,5 +7,5 @@ Author: Willem Vervoort
 Maintainer: Willem Vervoort <willemvervoort@gmail.com>
 Description: More about what it does (maybe more than one line)
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.4), RcppEigen
+Imports: Rcpp (>= 0.12.4), RcppEigen, lattice
 LinkingTo: Rcpp, RcppEigen, RcppNumerical

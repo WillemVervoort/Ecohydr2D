@@ -136,10 +136,10 @@ Gwt.fun <- function(t,last_t_heads, BC,
 
 
 big.fun <- function(N, stype, vtype, aqK_in, aq_specy_in, 
-                    Rain, ETp, stream, gwheads, Zmean,
+                    Rain, ETp, stream, gwheads, Zmean=NULL,
 		rdir_in = "c:/users/rver4657/owncloud/ecohydrology2dmodellng",
 		today.m = today, 
-		fs=1, Res_in=100) {
+	  Res_in=100) {
 #print(gwheads)
 
 # -----------------------------
@@ -168,8 +168,9 @@ big.fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
   spec_y <- soilpar_in$spec_y
 
 # read the stream and gw data  
+#  ifelse(!dir.exists(file.path(rdir_in,"input")),print("gwt_input_parameters.r should be in a dir called input"),
   read.fun1(input_dir = paste(rdir_in,"input",sep="/"),stream.m = stream, gwheads.m = gwheads, 
-	  	Res = Res_in) #1/(soilpar_in$K_s*0.01))
+	  	Res = Res_in)#) #1/(soilpar_in$K_s*0.01))
 
 	# create a name for any output files
 	NameRun<-paste(today.m,N,stype,sep="_")
@@ -301,9 +302,11 @@ while (STOP == FALSE) {
   		#print(GW_store$GWdepths[t,])
   #		save(GW_store,file="GW_store_temp")
   	#browser()
+  		if(is.null(Zmean)==T) Zmean_in <- rep(200,NX) else Zmean_in <- Zmean 
       Storage_Gridday <- WBEcoHyd(t=t,R=R[t],ET_in=ETp[t,2],vtype=vtype,
                                soilpar=soilpar_in, s_init = s_init, 
-                               fullday = t, Zmean = Zmean, 
+                               fullday = t, 
+                               Zmean = Zmean_in,
                                GWdepths=-100*GW_store$GWdepths[t,], 
                               GWdepths_prev=-100*last_heads_in,
                                deltat=12, NX, NY)
@@ -340,12 +343,15 @@ STOP <- TRUE
 # ---------------------------------------------
 # Write and store output
 # -------------------------------------
+# check if output dir exists
+ifelse(!dir.exists(file.path(getwd(), "Output")), 
+       dir.create(file.path(getwd(), "Output")), FALSE)
 # write away values to some files (WB etc)
 Storage.out <- do.call(cbind,Storage_day)
-write.csv(Storage.out,paste(NameRun,"DailyOutput_table.csv",sep="_"),
+write.csv(Storage.out,paste(getwd(),"/output/",NameRun,"_DailyOutput_table.csv",sep=""),
 		row.names=FALSE)
 GWstore.out <- do.call(cbind,GW_store)
-write.csv(GWstore.out,paste(NameRun,"GWOutput_table.csv",sep="_"),
+write.csv(GWstore.out,paste(getwd(),"/output/",NameRun,"_GWOutput_table.csv",sep=""),
 		row.names=FALSE)
 
 # Create a water balance table
@@ -355,7 +361,7 @@ Wb[c(1:42,((8*42):((9*42)-1)))] <-
 	apply(Storage.out,2,mean)[c(1:42,((8*42):((9*42)-1)))]
 #print(Wb)
 
-write.table(Wb,paste(NameRun,"Output_WB_table.csv",sep="_"),row.names=FALSE,
+write.table(Wb,paste(getwd(),"/output/",NameRun,"_Output_WB_table.csv",sep=""),row.names=FALSE,
     col.names=TRUE,sep=",")
 
 # Create output out of function
