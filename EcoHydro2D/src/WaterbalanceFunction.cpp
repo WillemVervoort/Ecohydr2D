@@ -40,7 +40,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   double Leakage = 0.0;
   double smloss = 0.0;
   double GWrech = 0.0;
-  const bool funswitch = vegpar_in["DR"];
+  bool funswitch = Rcpp::as<bool>(vegpar_in["DR"]);
   
   // Change Rainfall into infiltration
   double Phi = In;
@@ -53,19 +53,22 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   if(Phi > (1 - last_t_soil_sat)){
     Phi = 1 - last_t_soil_sat;
     surfoff = (In - Phi)*n*Zr;
-  } 
-  //Rcpp::Rcout << "Phi" << Phi << std::endl;
+  } else {
+    Phi = In;
+    surfoff = 0.0;
+  }
+  //Rcpp::Rcout << "funswitch" << funswitch << std::endl;
   NumericVector loss(5); 
   // Call the loss model
-  if (funswitch==TRUE) {
-    loss = FB_new_cpp(last_t_soil_sat, 
-                      soilpar_in, vegpar_in,
-                      Z_in, Zmean_in, Z_prev);
-   // Rcpp::Rcout << "loss0 = " << loss[0] << std::endl;
-  } else {
+  if (funswitch==0) {
     loss = rho_new_cpp(last_t_soil_sat, 
                        soilpar_in, vegpar_in,
                        Z_in,Zmean_in, Z_prev);
+   // Rcpp::Rcout << "loss0 = " << loss[0] << std::endl;
+  } else {
+    loss = FB_new_cpp(last_t_soil_sat, 
+                      soilpar_in, vegpar_in,
+                      Z_in, Zmean_in, Z_prev);
   }
   // update the water balance
   // ss.t is temporary ss
@@ -89,7 +92,7 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
   Tt = Tg + Ts;
   if (loss[4] > 0.0) {
     Leakage = loss[4]*intincr;
-  } 
+  }  else Leakage = 0.0;
   //increase with difference between originally calculated and new (pot.reduced) capillary flux
   smloss = (loss[0]*intincr  - (qcap - loss[3]*intincr)); 
   GWrech = Leakage-Tg-qcap;
@@ -160,10 +163,13 @@ NumericMatrix WBEcoHyd(int t, double R, double ET_in,
       if (p == 0) {
         // needs to be t - 1 as counters in C++ start at 0
         R_in = R/(n*Zr);
-      }
+      } else R_in = 0.0;
+      //Rcpp::Rcout << R_in << std::endl; 
+      
       // run the water balance
-      if (p > 0 ) s_old = Storage_Subday(0,(p-1));
-      //Rcpp::Rcout << s_old << std::endl; 
+      if (p > 0 ) {
+        s_old = Storage_Subday(0,(p-1)); 
+      } else s_old = s_init(j);
       
       //     // Storage_Subday is not defined
       List Water_out = WB_fun_cpp(vegpar, R_in, s_old,

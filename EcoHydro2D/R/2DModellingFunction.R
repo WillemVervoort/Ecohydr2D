@@ -218,104 +218,104 @@ while (STOP == FALSE) {
 # START OF THE LOOPS --------------------------#
 # run a loop through the days
 	for (t in 1:N) {
-	  
-	  # Initialise
-		if (t == 1)	{
-		  # 1. define initial soil moisture
-		  s_init <- rep(0.5,NX*NY)
-  		# 2. initialise gwheads
-	   last_heads_in <- gwheads
-	    # 3. initialise recharge
-	   rech <- rep(0.0,NX)
-		} else {
-	    last_heads_in <- GW_store$heads[t-1,]
-	    rech <- GW_store$GWcum[t-1,]
-	    #print(rech)
-		} 
-	  #browser()
-		# check the river level
-		if (stream[t,2] < 0.06) {
-			if (stream[t-1,2] >= 0.06 || t == 1) {
-				#print("t = 1 or river dry")
-				# run gwt.exe function first time to
-			  #browser()
-				GW.out <- Gwt.fun(t, last_t_heads = last_heads_in, 
-					BC = gwheads[NX], first=T, 
-					aqK = aqK_in, aqy = aq_specy_in, GWcumvector = rech, 
-					slopevector = slopevector.m,
-					DELT.m = DELT,
-					NRBL.m = 1,
-					river_in = list(Ariver[2],criver[2],
-					IXR[2],IYR[2]),rdir_echo=rdir_in)  
-				# reset DELT (timestep)
-				DELT <- GW.out$DELT
-			} else { #this means river is dry, but last step also dry
-				#print("t1 > 1")
-				#print(GW_store$GWcum[t-1,])
-				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
-					first=F, BC = gwheads[NX],  
-					aqK = aqK_in, aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
-					slopevector = slopevector.m,
-					DELT.m = DELT,
-					NRBL.m = NRBL,rdir_echo=rdir_in)
-			} #close loop whether first time run
-		}  else  { # river level > 0
-			# check if first time after river level back up or first time
-			if (stream[t-1,2] < 0.06 || t == 1) {
-				# run gwt.exe function
-    		GW.out <- Gwt.fun(t,last_t_heads = last_heads_in, 
-					first=T, BC = c(riverheads[t],gwheads[NX]),
-					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=rech, 
-					slopevector = slopevector.m,
-					DELT.m = DELT,
-					NRBL.m = NRBL,
-					river_in = list(Ariver,criver,
-					                IXR,IYR),rdir_echo=rdir_in)
-			} else {
-				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
-   					first=F, BC = c(riverheads[t],gwheads[NX]),
-					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
-					slopevector = slopevector.m,
-					DELT.m = DELT,
-					NRBL.m = NRBL,rdir_echo=rdir_in)  
-			} # Close if loop whether first time run
-		} # close riverlevel loop
-				# reset DELT
-				# print(paste("gwt.exe is run and DELT =",DELT))
-			#	DELT <- GW.out$DELT
-				GW.out$out$Gwcum <- rep(0.0,NX)
-				STOP <- GW.out$STOP
-				print(STOP)
-			#	print(GW.out$out$Gwcum)
-			#	print(GW_store$GWcum[t-1,])
-			# change DELT
-			DELT <- ifelse(GW.out$DELT==1,1,DELT + 1)
-		# write away gw output 
-		# if Gwt.fun wasn't run, it just writes the last one again
-		r <- 1:(ncol(GW.out$out))
-#		print(GW.out$out)
-		GW_store <- list.write.fun(r, input=GW.out$out, 
-			output = GW_store, t = t) 
-		#str(GW_store)
-#		print("GW_store$GWcum:")
-		#print(GW_store$GWdepths[t,])
-#		save(GW_store,file="GW_store_temp")
-	#browser()
-    Storage_Gridday <- WBEcoHyd(t=t,R=R[t],ET_in=ETp[t,2],vtype=vtype,
-                             soilpar=soilpar_in, s_init = s_init, 
-                             fullday = t, Zmean = Zmean, 
-                             GWdepths=-100*GW_store$GWdepths[t,], 
-                            GWdepths_prev=-100*last_heads_in,
-                             deltat=12, NX, NY)
-		#browser()
- 		# daily values across grid
-		Storage_day <- list.write.fun2(input=Storage_Gridday, 
-		 		output = Storage_day, t=t)
-		#str(Storage_day)
-		# Accumulate the GW recharge, this is now in GW_store
-		GW_store$GWcum[t,] <- GW_store$GWcum[t,] + Storage_day$GWrech[t,]*0.01 # m/day		
-		#print(Storage_day$GWrech[t,]*0.01)
-		print(paste("t =",t))
+
+  	  # Initialise
+  		if (t == 1)	{
+  		  # 1. define initial soil moisture
+  		  s_init <- rep(0.5,NX*NY)
+    		# 2. initialise gwheads
+  	   last_heads_in <- gwheads
+  	    # 3. initialise recharge
+  	   rech <- rep(0.0,NX)
+  		} else {
+  	    last_heads_in <- GW_store$heads[t-1,]
+  	    rech <- GW_store$GWcum[t-1,]
+  	    #print(rech)
+  		} 
+  	  #browser()
+  		# check the river level
+  		if (stream[t,2] < 0.06) {
+  			if (stream[t-1,2] >= 0.06 || t == 1) {
+  				#print("t = 1 or river dry")
+  				# run gwt.exe function first time to
+  			  #browser()
+  				GW.out <- Gwt.fun(t, last_t_heads = last_heads_in, 
+  					BC = rep(gwheads[NX],NRBL), first=T, 
+  					aqK = aqK_in, aqy = aq_specy_in, GWcumvector = rech, 
+  					slopevector = slopevector.m,
+  					DELT.m = DELT,
+  					NRBL.m = NRBL,
+  					river_in = list(Ariver,criver,
+  					IXR,IYR),rdir_echo=rdir_in)  
+  				# reset DELT (timestep)
+  				DELT <- GW.out$DELT
+  			} else { #this means river is dry, but last step also dry
+  				#print("t1 > 1")
+  				#print(GW_store$GWcum[t-1,])
+  				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
+  					first=F, BC = rep(gwheads[NX],NRBL),  
+  					aqK = aqK_in, aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
+  					slopevector = slopevector.m,
+  					DELT.m = DELT,
+  					NRBL.m = NRBL,rdir_echo=rdir_in)
+  			} #close loop whether first time run
+  		}  else  { # river level > 0
+  			# check if first time after river level back up or first time
+  			if (stream[t-1,2] < 0.06 || t == 1) {
+  				# run gwt.exe function
+      		GW.out <- Gwt.fun(t,last_t_heads = last_heads_in, 
+  					first=T, BC = c(riverheads[t],gwheads[NX]),
+  					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=rech, 
+  					slopevector = slopevector.m,
+  					DELT.m = DELT,
+  					NRBL.m = NRBL,
+  					river_in = list(Ariver,criver,
+  					                IXR,IYR),rdir_echo=rdir_in)
+  			} else {
+  				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
+     					first=F, BC = c(riverheads[t],gwheads[NX]),
+  					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
+  					slopevector = slopevector.m,
+  					DELT.m = DELT,
+  					NRBL.m = NRBL,rdir_echo=rdir_in)  
+  			} # Close if loop whether first time run
+  		} # close riverlevel loop
+  				# reset DELT
+  				# print(paste("gwt.exe is run and DELT =",DELT))
+  			#	DELT <- GW.out$DELT
+  				GW.out$out$Gwcum <- rep(0.0,NX)
+  				STOP <- GW.out$STOP
+  				#print(STOP)
+  			#	print(GW.out$out$Gwcum)
+  			#	print(GW_store$GWcum[t-1,])
+  			# change DELT
+  			DELT <- ifelse(GW.out$DELT==1,1,DELT + 1)
+  		# write away gw output 
+  		# if Gwt.fun wasn't run, it just writes the last one again
+  		r <- 1:(ncol(GW.out$out))
+  #		print(GW.out$out)
+  		GW_store <- list.write.fun(r, input=GW.out$out, 
+  			output = GW_store, t = t) 
+  		#str(GW_store)
+  #		print("GW_store$GWcum:")
+  		#print(GW_store$GWdepths[t,])
+  #		save(GW_store,file="GW_store_temp")
+  	#browser()
+      Storage_Gridday <- WBEcoHyd(t=t,R=R[t],ET_in=ETp[t,2],vtype=vtype,
+                               soilpar=soilpar_in, s_init = s_init, 
+                               fullday = t, Zmean = Zmean, 
+                               GWdepths=-100*GW_store$GWdepths[t,], 
+                              GWdepths_prev=-100*last_heads_in,
+                               deltat=12, NX, NY)
+  		#browser()
+   		# daily values across grid
+  		Storage_day <- list.write.fun2(input=Storage_Gridday, 
+  		 		output = Storage_day, t=t)
+  		#str(Storage_day)
+  		# Accumulate the GW recharge, this is now in GW_store
+  		GW_store$GWcum[t,] <- GW_store$GWcum[t,] + Storage_day$GWrech[t,]*0.01 # m/day		
+  		#print(Storage_day$GWrech[t,]*0.01)
+  		print(paste("t =",t))
 	} # close t loop
 
 # ------------ END OF LOOPS ---------------------

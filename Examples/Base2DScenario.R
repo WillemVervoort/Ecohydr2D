@@ -37,13 +37,13 @@ veggies <- c("Bare",rep("TreesDR",10), veg,"Bare")
 # Define what soil to use
 # in the future this should become also a vector
 soils <- "L Med Clay"
-sp <- Soil_cpp(soils)
+sp <- Soil_cpp("Loamy Sand")
 # define spec_y separately
-sp$spec_y <- 0.15
+sp$spec_y <- 0.5
 #
 # now includes separate K for aquifer (sand) based on Pfautsch et al.
-system.time({result <- big.fun(N=500,stype=soils,vtype=veggies, aqK_in = sp$K_s/100, 
-                  aq_specy_in  = sp$spec_y,Rain=Rain, 
+system.time({result <- big.fun(N=500,stype=soils,vtype=veggies, 
+                              aqK_in = sp$K_s/100,  aq_specy_in  = sp$spec_y,Rain=Rain, 
                   ETp=ETp,stream=Stream, gwheads = gw_in, Zmean = Zmean, 
                   today.m = today, fs = fs_veg)})
 
@@ -82,7 +82,7 @@ my.strip3 <- function(which.given, ..., factor.levels, bg) {
 }
 
 
-sub1_Out <- Out[(Out$loc %in% c(40, 80, 120, 220)),]
+sub1_Out <- Out[(Out$loc %in% c(30, 60, 100, 295)),]
 
 xyplot(Tg*10+Ts*10~as.Date(Dates)|as.factor(loc),data=sub1_Out, 
 	type="l",strip=my.strip3,xlab =list( "Days",font=2,cex=1.2), 
@@ -98,11 +98,11 @@ GWsim <- data.frame(Dates=sub1_Out$Dates, level=sub1_Out$gwlevel,
 GWobs <- data.frame(Dates=rep(as.Date(GWdata$Date,"%d/%m/%Y"),4), 
                     level=rep(GWdata$Control_m_f_surf,4),
                     ind=rep("obs",nrow(GWdata)*4),
-                    loc=rep(c(0, 40, 80, 175),each=nrow(GWdata)))
+                    loc=rep(c(30, 60, 100, 295),each=nrow(GWdata)))
 Strobs <- data.frame(Dates=rep(as.Date(Stream$Date,"%d/%m/%Y"),4), 
                     level=rep(Stream$Height,4),
                     ind=rep("stream",nrow(Stream)*4),
-                    loc=rep(c(0, 40, 80, 175),each=nrow(Stream)))
+                    loc=rep(c(30, 60, 100, 295),each=nrow(Stream)))
 # Rainobs <- data.frame(Dates=rep(as.Date(Rain$dates,"%d/%m/%Y"),4), 
 #                      level=rep(Rain$Rain/2-5,4),
 #                      ind=rep("rain",nrow(Rain)*4),
