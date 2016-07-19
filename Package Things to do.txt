@@ -1,0 +1,7 @@
+Package Ecohydr2D things to do:
+1. Move current examples to a different directory (not synced with Bitbucket)
+2. Create a very simple example that does not need GWT.exe for 10 grid cells
+3. Create a second example that uses GWT.exe, but only for 10 grid cells and a simple river/BC
+4. Write the help files for all the functions
+5. fork bitbucket to keep a separate development copy
+
