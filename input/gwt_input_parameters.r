@@ -1,3 +1,6 @@
+# replaced by ecohydro2d.options()
+# deprecated August 2016
+
 # ----------------
 # Grid
 # ---------------
@@ -23,8 +26,6 @@ slope <- slopefun(NX,NY,dslope_x,dslope_y)
 # Depth of water table:
 init_heads <- gwheads #meters
 bottom <- -25   #meters
-bottommatrix<-matrix(bottom,NX,NY)
-bottomvector<-matrixtovector(bottommatrix)
 
 # -------------------
 

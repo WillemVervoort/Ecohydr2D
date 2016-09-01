@@ -67,7 +67,7 @@ str(soilpar)
 names(soilpar)
 # assign a value
 vegpar$K_s <- 0.5
-
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }

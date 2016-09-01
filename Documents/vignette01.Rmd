@@ -1,0 +1,80 @@
+---
+title: "Vignette EcoHydr2D 0.1"
+author: "Willem Vervoort"
+date: "27 August 2016"
+output: pdf_document
+---
+
+# Introduction
+This is the vignette demonstrating the alpha version of the ecohydr2d package. The package contains functions based on the ecohydrological work from Vervoort and van der Zee (2012) but extended to include a 1-D models included in a 2-D grid overlying a single cell groundwater system modelled with a separate fortran groundwater model developed by Prof. Toon Leijnse (gwt.exe). 
+![Model schematic](modelschematic.jpg)
+
+Vervoort R.W. and S.E.A.T.M. van der Zee (2012) On stochastic modelling of groundwater uptake in semi-arid water-limited systems: root density and seasonality effects. _Ecohydrology_ [doi:10.1002/eco.1288](doi:10.1002/eco.1288).  
+
+# First example: uniform rainfall
+This first examples shows how the program is set up and how a simple simulation of a basic model with 10 grid cells with a uniform vegetation can be set up. This includes the set up of the input files for gwt.exe as well as the overall model setup and analysis of the output
+
+## Step 1: setup of packages and working directory  
+This currently assumes that the package EcoHydro2D is installed and can be loaded. Once I have worked out how Git and devtools work together I will change this.  
+```{r preliminaries}
+require(lattice)
+require(EcoHydro2D)
+
+today <- format(Sys.Date(),"%Y%m%d")
+```
+
+## Step 2 define inputs: uniform rainfall for two years  
+We will start with a scenario which simulates uniform rainfall and uniform potential ET on a 10 cell linear grid in the x-direction (so the y-dimension is 1). Units in the model are cm and days.  
+The first step will be to define the three input time series that are needed for the model:
+
+* Rainfall, uniform 0.25 cm/day
+* Streamflow (which is set to 0 here)
+* potential ET, uniform 0.5 cm/day  
+The date values are arbitrary.   
+
+```{r define inputs}
+days <- seq(as.Date("2005-01-01"),as.Date("2006-12-31"),by=1)
+Rain_uni <- data.frame(Dates = days, Rain = rep(0.1,730))
+# start with no water in Stream
+Stream0 <- data.frame(Dates = days, Height = rep(0,730))
+# and uniform ETp
+ETp_uni <- data.frame(Dates = days, ET = rep(0.5,730))
+```
+
+### 2.1 define groundwater model parameters
+One of the things to do is to define the parameters for the groundwater model. This is slightly cryptic, but is described in more detail in the manual of gwt.exe which is provided in the documents folder. Currently the important values are hidden in a list under `ecohydro2d.options()`
+
+
+```{r gwt_input}
+# show the options
+ecohydro2d.options()
+# you can now call different elements and reset them
+
+# Initial groundwater heads
+gw_in <-  rep(-6,length(ecohydro2d.options("DELX")))
+# this is needed for Trees with deep roots
+Zmean <- rep(600,length(ecohydro2d.options("DELX"))) 
+```
+
+We can now define the vegetation and the soils, starting off with uniform grass.
+
+```{r defineVegSoil}
+# Define the vegetation series as being uniform grass
+veg <- rep("Grass",length(ecohydro2d.options("DELX")))
+# Define what soil to use
+soils <- "L Med Clay"
+sp <- Soil_cpp("soils")
+#
+```
+
+Finally the model can be run via `big_fun`. I need to come up with a better name for this function. There is the ability to specify a separate Ks for the aquifer `aqKin` and also a separate specific yield via `aq_specy_in`.   
+```{r runFunction}
+result <- big_fun(N=nrow(Rain_uni),stype=soils,vtype=veg, 
+                          aqK_in = sp$K_s/100,  
+                          aq_specy_in  = sp$spec_y,
+                          Rain=Rain_uni, ETp=ETp_uni,
+                          stream=Stream0, gwheads = gw_in, 
+                          Zmean = Zmean,today.m = today)
+```
+  
+Now some plotting of the results to demonstrate how the function works.

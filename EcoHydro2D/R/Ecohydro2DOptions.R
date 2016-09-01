@@ -1,51 +1,47 @@
 ## copied from Hydromad: 
 ## https://github.com/josephguillaume/hydromad/blob/master/R/options.R
 ##
+## Willem Vervoort
 
-.defaultEcoHydro2DOptions <- function() {
+.defaultecohydro2dOptions <- function() {
   list(
     # ----------------
     # Grid
     # ---------------
     NX = 12,
     NY = 1,
-    NRBL = 0,    #number of river blocks
-    DELX = rep(10,NX),
+    NRBL = 2,    #number of river blocks
+    IXR = c(1,12), # location river blocks in X and Y dir
+    IYR = c(1,1),
+    DELX = c(20,seq(20,200,by=20),20),
     DELY = 100,   
     ITIM = 1,
     # --------------------
     # Groundwater
     # --------------------
     # Depth of water table:
-    init_heads = rep(2,NX), #meters
     bottom = -25,   #meters
-    bottommatrix = matrix(bottom,NX,NY),
     GWthreshold = 0.0, #m 
     DELTcrit = 21,   #days
+    dslope_x = 0, # m difference in x-direction
+    dslope_y = 0, # m difference in y-direction
     # -------------------
     ########################
     #river: 
     ########################
-    RES = NULL,
-    criver = c(RES,0.1), #resistance (m) # WV says Increase this to limit leakage from river
-    Ariver <- rep(100,NRBL), # river area (m^2) # this is a guess
-#    if (NRBL > 0) {
-      riverheads <- rep(2,NRBL) # water head river (m). 
- #   } else {
-  #    hriver=0 # should have some value, otherwise: formula breaks off
-   # }
+    RES = 100
   )
 }
     
 #3 hydromad says:    
 ## code below copied from lattice
 
-EcoHydro2D.getOption <- function(name)
+ecohydro2d.getOption <- function(name)
 {
-  .EcoHydro2DEnv$options[[name]]
+  .ecohydro2dEnv$options[[name]]
 }
 
-EcoHydro2D.options <- function(...)
+ecohydro2d.options <- function(...)
 {
   ## this would have been really simple if only form allowed were
   ## lattice.options("foo", "bar") and
@@ -54,7 +50,7 @@ EcoHydro2D.options <- function(...)
   
   new <- list(...)
     if (is.null(names(new)) && length(new) == 1 && is.list(new[[1]])) new <- new[[1]]
-  old <- .EcoHydro2DEnv$options
+  old <- .ecohydro2dEnv$options
   
   ## if no args supplied, returns full options list
   if (length(new) == 0) return(old)
@@ -83,7 +79,7 @@ EcoHydro2D.options <- function(...)
     if (is.null(x)) x <- list()
     utils::modifyList(x, val)
   }
-  .EcoHydro2DEnv$options <- updateList(old, new[nm])
+  .ecohydro2dEnv$options <- updateList(old, new[nm])
   
   ## return changed entries invisibly
   invisible(retVal)

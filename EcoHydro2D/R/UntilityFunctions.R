@@ -18,19 +18,37 @@ stackfun <- function(data,NX) { # this needs to be adapted relative to what you 
 }
 
 # # Read in function for sourcing other scripts
-# read.fun <- function(rdir = rdir_in) {
-#   source(paste(rdir,"soilfunction.r",sep="/"))
-#   source(paste(rdir,"vegfunction.r",sep="/"))
-# }
-read.fun1 <- function(input_dir, stream.m = stream, gwheads.m = gwheads,
-                      Res = NULL) {
-  attach(list(gwheads=gwheads.m,stream=stream.m, RES= Res))
+# this needs to be rewritten to be based on ecohydro2d.options
+read.fun1 <- function(stream.m, gwheads.m) {
+  NX <- ecohydro2d.options()$NX
+  NY <- ecohydro2d.options()$NY
+  DELX <- ecohydro2d.options()$DELX
+  NRBL <- ecohydro2d.options()$NRBL
+  dslope_x <- ecohydro2d.options()$dslope_x
+  dslope_y <- ecohydro2d.options()$dslope_y
+  RES <- ecohydro2d.options()$RES
+  #browser()
+  bottommatrix<-matrix(ecohydro2d.options()$bottom,NX,NY)
+  bottomvector<-matrixtovector(bottommatrix)
+  # This assumes no overbank flows in the period. 
+  # creates riverheads vector
+  if(NRBL==0) hriver <- 0 else hriver = NULL # should have some value, otherwise: formula breaks off
+  distancetoriver=c(0,cumsum(DELX[1:length(DELX)]))
+  slope <- slopefun(NX,NY,
+            dslope_x,dslope_y)
   
-  source(paste(input_dir,"gwt_input_parameters.r",sep="/")) #You need to adjust values in here as well!!
-#  source(paste(rdir,"define_input.r",sep="/"))      #also the parameters are called
+  # Depth of water table:
+  riverheads <- stream.m[,2]  # water head river (m).
+  init_heads <- gwheads.m # groundwater heads (m).
+  # river parameters
+  criver = c(RES,0.1) #resistance (m) # WV says Increase this to limit leakage from river
+  Ariver <- rep(100,NRBL) # river area (m^2) # this is a guess
   
-  # detach again to make sure there is no confusion
-  detach(list(gwheads = gwheads.m, stream = stream.m, RES = Res))
+  return(list(bottommatrix=bottommatrix,bottomvector=bottomvector,
+                       slope=slope, riverheads=riverheads,
+                       distancetoriver = distancetoriver,
+                       init_heads = init_heads, criver = criver,
+                       Ariver = Ariver, hriver=hriver))
 }
 
 # Create a write function for storage matrices
@@ -72,7 +90,7 @@ list.write.fun2 <- function(output,input,t) {
 
 ## Write important data to file
 SaveParameterData <- function(name){
-  Out<- cbind(NX,NY,NRBL,t(DELX),DELY,init_heads,bottom,GWthreshold,DELTcrit,dslope_x, dslope_y,
+  Out<- cbind(NX,NY,NRBL,t(DELX),DELY,init_heads,bottom,dslope_x, dslope_y,
               criver, Ariver, riverheads)
   write.table(Out,name,row.names=FALSE,col.names=TRUE,sep=",")
 }
