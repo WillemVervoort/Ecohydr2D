@@ -203,8 +203,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // WBEcoHyd
-NumericMatrix WBEcoHyd(int t, double R, double ET_in, CharacterVector vtype, List soilpar, NumericVector s_init, double fullday, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, int NX, int NY);
-RcppExport SEXP EcoHydro2D_WBEcoHyd(SEXP tSEXP, SEXP RSEXP, SEXP ET_inSEXP, SEXP vtypeSEXP, SEXP soilparSEXP, SEXP s_initSEXP, SEXP fulldaySEXP, SEXP ZmeanSEXP, SEXP GWdepthsSEXP, SEXP GWdepths_prevSEXP, SEXP deltatSEXP, SEXP NXSEXP, SEXP NYSEXP) {
+NumericMatrix WBEcoHyd(int t, double R, double ET_in, CharacterVector vtype, List soilpar, NumericVector s_init, NumericVector Zmean, NumericVector GWdepths, NumericVector GWdepths_prev, int deltat, int NX, int NY);
+RcppExport SEXP EcoHydro2D_WBEcoHyd(SEXP tSEXP, SEXP RSEXP, SEXP ET_inSEXP, SEXP vtypeSEXP, SEXP soilparSEXP, SEXP s_initSEXP, SEXP ZmeanSEXP, SEXP GWdepthsSEXP, SEXP GWdepths_prevSEXP, SEXP deltatSEXP, SEXP NXSEXP, SEXP NYSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -214,14 +214,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type vtype(vtypeSEXP);
     Rcpp::traits::input_parameter< List >::type soilpar(soilparSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_init(s_initSEXP);
-    Rcpp::traits::input_parameter< double >::type fullday(fulldaySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type Zmean(ZmeanSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type GWdepths(GWdepthsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type GWdepths_prev(GWdepths_prevSEXP);
     Rcpp::traits::input_parameter< int >::type deltat(deltatSEXP);
     Rcpp::traits::input_parameter< int >::type NX(NXSEXP);
     Rcpp::traits::input_parameter< int >::type NY(NYSEXP);
-    __result = Rcpp::wrap(WBEcoHyd(t, R, ET_in, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY));
+    __result = Rcpp::wrap(WBEcoHyd(t, R, ET_in, vtype, soilpar, s_init, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY));
     return __result;
 END_RCPP
 }

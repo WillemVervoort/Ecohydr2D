@@ -6,7 +6,7 @@
 #-----------------------
 require(lattice)
 require(EcoHydro2D)
-setwd("c:/users/rver4657/owncloud/ecohydrology2dmodellng/examples")
+setwd("c:/users/rver4657/owncloud/ecohydro2d/examples")
 #----------------------------
 
 today <- format(Sys.Date(),"%Y%m%d")

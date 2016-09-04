@@ -1,20 +1,25 @@
 # utility functions
 
-# Do a stack operation, Joep actually wrote a function for this
-stackfun <- function(data,NX) { # this needs to be adapted relative to what you want
+# Do a stack operation, Joep van der Zanden actually wrote a function for this
+stackfun <- function(data,NX) { 
+   # this needs to be adapted relative to what you want
     #browser()
-    df <- data.frame(days=rep(data$id,NX), Rain=rep(data$Rain,NX),
-                   loc=rep(data$x[(length(data$x)-NX+1):length(data$x)],each=length(data$id)),
-                   River=rep(data$Stream,NX), 
+    df <- data.frame(days=rep(data$id,NX), rain=rep(data$rain,NX),
+                   location=rep(data$x[(length(data$x)-NX+1):length(data$x)],each=length(data$id)),
+                   vtype=rep(data$vtype[(length(data$vtype)-NX+1):length(data$vtype)],each=length(data$id)),
+                  stream=rep(data$stream,NX),qrivlat=rep(data$qrivlat,NX),  
                    Ts = stack(as.data.frame(data$Tsoil[,1:NX]))[,1],
                    Tg = stack(as.data.frame(data$Tgw[,1:NX]))[,1],
                    Ttotal = stack(as.data.frame(data$Ttotal[,1:NX]))[,1], 
                    s = stack(as.data.frame(data$s[,1:NX]))[,1],
                    qcap = stack(as.data.frame(data$qcap[,1:NX]))[,1],
                    gwlevel = stack(as.data.frame(data$gwlevel[,1:NX]))[,1],
-                   gwrech = stack(as.data.frame(data$GWrech[,1:NX]))[,1],
+                   gwrech = stack(as.data.frame(data$gwrech[,1:NX]))[,1],
+                   leakage = stack(as.data.frame(data$leakage[,1:NX]))[,1],
+                   surfoff = stack(as.data.frame(data$static_stress[,1:NX]))[,1],
+                   smloss = stack(as.data.frame(data$static_stress[,1:NX]))[,1],
                    stress = stack(as.data.frame(data$static_stress[,1:NX]))[,1])
-  return(df)
+return(df)
 }
 
 # # Read in function for sourcing other scripts
@@ -121,91 +126,6 @@ vectortomatrix<-function(inputvector, Ncol){
   return(outputmatrix)
 }
 
-# 
-# if(NX==1){
-#   widthxvector<-DELX
-#   distancetoriver<-0
-# }else{
-#   if(length(DELX)==1){widthxvector<-matrix(DELX, 1, NX)
-#   
-#   }else{
-#     widthxvector<-cbind(DELX)}
-#   
-#   distancetoriver<-vector(mode="numeric", length=NX)
-#   distancetoriver[1]<- -0.5*widthxvector[1]
-#   #    widthxvector[1]<- -widthxvector[1]*1/2
-#   for(i in 2:NX){
-#     distancetoriver[i]<-0.5*widthxvector[i]+0.5*widthxvector[i-1]+distancetoriver[i-1]}
-# }
-# distancetoriver[1]<-0
-# 
-# # define widthxvector here when no constant width is used
-# widthyvector<-matrix(DELY, 1, NY) # define widthyvector here when no constant width is used
-
-define_gwt_gridinput <- function (NX, NY, NRBL, 
-                                widthxvector, widthyvector, NB=NULL, XB1=NULL,
-                                YB1=NULL, XB2=NULL, YB2=NULL, XB3=NULL, 
-                                YB3=NULL, XB4=NULL, YB4=NULL) {
-  firstline <- c(NX,NY, NRBL)
-  fourthline <- NB
-  rest <- cbind(c(XB1,XB2,XB3,XB4),c(YB1,YB2,YB3,YB4))
-  write.table(t(firstline),"gwt_gridinput",row.names=FALSE,col.names=FALSE,sep=",")
-  write.table(t(widthxvector),"gwt_gridinput",sep=",",row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-  write.table(t(widthyvector),"gwt_gridinput",row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-  write.table(c(fourthline),"gwt_gridinput",row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-  write(paste(rest,sep=""),"gwt_gridinput",ncolumns=2,
-        append=TRUE,sep=",")
-}
-#define_gwt_gridinput(NX, NY, NRBL, widthxvector, widthyvector)#, NB, XB1, YB1, XB2, YB2, XB3, YB3, XB4, YB4)
-
-define_gwt_timestepinput <- function (ITIM, DELT, RECH, hriver) {
-  firstline <- c(ITIM, DELT)
-  write.table(t(firstline),"gwt_timestepinput", row.names=FALSE,col.names=FALSE,sep=",")
-  write.table(format(t(RECH),digits=2),"gwt_timestepinput",row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-  write.table(format(t(hriver),digits=2),"gwt_timestepinput", row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-}
-
-#define_gwt_timestepinput(ITIM, DELT, RECH, hriver=hriver)
-
-define_gwt_hydroinput <- function (headvector, bottomvector,ksat,spec_y) {
-  firstline <- paste(headvector)
-  secondline <- paste(bottomvector)
-  thirdline <- paste(NX*NY,"*",ksat,sep="")
-  fifthline <- paste(NX*NY,"*",spec_y,sep="")
-  write.table(t(firstline),"gwt_hydroinput",row.names=FALSE,col.names=FALSE,sep=",",quote=FALSE)
-  write.table(t(secondline),"gwt_hydroinput",row.names=FALSE,col.names=FALSE,sep=",",
-              append=TRUE,quote=FALSE)
-  write.table(c(thirdline,thirdline,fifthline),"gwt_hydroinput",row.names=FALSE,col.names=FALSE,
-              append=TRUE,quote=FALSE)
-  #  write.table(c(firstline,secondline,thirdline,thirdline,fifthline),"testgwt_hydroinput",row.names=FALSE,col.names=FALSE,
-  #      append=TRUE,quote=FALSE)
-  #  write(paste(RECH,"testgwt_gridinput"),ncolumns=NX*NY,
-  #     append=TRUE,sep=",")
-}
-
-
-#ksat<-soilpar$K_s
-#define_gwt_hydroinput(init_heads, bottom, "H Clay", ksat)                                                     
-
-#define_gwt_gridinput(NX, NY, NRBL, widthxvector, widthyvector)#, NB, XB1, YB1, XB2, YB2, XB3, YB3, XB4, YB4)
-#define_gwt_hydroinput(headvector, bottomvector, stype, ksat)                                                     
-#define_gwt_timestepinput(ITIM, DELT, RECH)
-
-
-define_gwt_riverinput <- function(NRBL,Ariver,criver,IXR,IYR) {
-    rivermatrix <- matrix(0,NRBL,4) 
-    rivermatrix[,3] <- Ariver
-    rivermatrix[,4] <- criver
-    #coordinates:
-    rivermatrix[,1] <- IXR
-    rivermatrix[,2] <- IYR
-  write.table(rivermatrix,"gwt_riverinput", row.names=FALSE,col.names=FALSE,sep=",")
-}
 
 
 slopefun <- function(NX,NY,dslope_x,dslope_y) {

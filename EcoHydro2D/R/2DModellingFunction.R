@@ -33,13 +33,11 @@
 
 Gwt.fun <- function(t,last_t_heads, BC,
 				first=T, 
-				GWcumvector,slopevector,
-				aqK, aqy,
-				DELT.m = DELT,
-				NRBL.m = NRBL,
-				river_in=list(length=4),
-				rdir_echo=rdir_in,
-				NX_in = NX, NY_in = NY, gwinput_in=gwinput) {
+				gwcumvector,slopevector_f,
+				aq_K_f, aq_sy,
+				DELT_f = DELT,
+				river_f=list(length=4),
+				gwinput_f=gwinput) {
 
 		# --------------------------------
 				# Three steps in this function:
@@ -52,70 +50,79 @@ Gwt.fun <- function(t,last_t_heads, BC,
     # last_t_heads  : groundwater heads at last time step
     # BC            : boundary conditions
     # first         : T or F, is model run for first time?
-    # GWcumvector   : accumulated recharge since last run
+    # gwcumvector   : accumulated recharge since last run
     # slopevector   : Whether model has a slope and what the slope is
-    # aqK           : Ks for aquifer (can be different from soil)
-    # aqy           : specific yield for aquifer
-    # DELT.m        : accumulated time since last run
-    # NRBL.m/NRBL   : number of river blocks
-    # river_in      : list of input with required river data (Ariver, criver, IXR and IXY)
+    # aq_K_f           : Ks for aquifer (can be different from soil)
+    # aq_sy           : specific yield for aquifer
+    # DELT_f        : accumulated time since last run
+    # river_f      : list of input with required river data (Ariver, criver, IXR and IXY)
+    # gwinput_f     : list of input of required gwdata
       STOP = FALSE
-		# 1. this writes the gwt_timestepinput file
+    # define based on options
+      NRBL = ecohydro2d.options()$NRBL
+      NX = ecohydro2d.options()$NX
+      NY = ecohydro2d.options()$NY
+      DELX = ecohydro2d.options()$DELX
+      DELY = ecohydro2d.options()$DELY
+      
+      # 1. this writes the gwt_timestepinput file
 	    # define input timestep
-     	define_gwt_timestepinput(ecohydro2d.options()$ITIM, DELT = DELT.m, 
-			  RECH = GWcumvector / DELT.m,
+     	define_gwt_timestepinput(ecohydro2d.options()$ITIM, DELT = DELT_f, 
+			  RECH = gwcumvector / DELT_f,
 			  hriver = BC)
 		# print(BC)
       # define the hydro input
-  		define_gwt_hydroinput(last_t_heads, gwinput_in$bottomvector,
-			  ksat = aqK, spec_y = aqy)  #K_s from cm/d to m/d
+  		define_gwt_hydroinput(NX,NY,last_t_heads, gwinput_f$bottomvector,
+			  ksat = aq_K_f, spec_y = aq_sy)  #K_s from cm/d to m/d
   		# at first timestep define the grid and the river
 		if (first == T) { # only for first timestep
-	  		define_gwt_gridinput(NX_in, NY_in, NRBL.m, 
+	  		define_gwt_gridinput(NX, NY, NRBL, 
 	  		                     widthxvector=DELX, widthyvector=DELY)
 		
-			Ariver2 <- river_in[[1]]
-			criver2 <- river_in[[2]]
-			IXR2 <- river_in[[3]]
-			IYR2 <- river_in[[4]]		
+			Ariver2 <- river_f[[1]]
+			criver2 <- river_f[[2]]
+			IXR2 <- river_f[[3]]
+			IYR2 <- river_f[[4]]		
 #		print(Ariver)
-			if(NRBL.m > 0) {define_gwt_riverinput(NRBL.m,Ariver2,
+			if(NRBL > 0) {define_gwt_riverinput(NRBL,Ariver2,
 			                                      criver2,IXR2,IYR2)}
 		}
 
 		# 2. execute model
-     	system(paste(rdir_echo,"Examples/GWT.exe",sep="/"))
-		
+  	  wd <- getwd()
+  	  setwd(paste(wd,"gwtmod",sep="/"))
+     	system("GWT.exe")
+		  setwd(wd)
 		# 3. organise output and reset values
 		# All output should be prefixed by env$ to make sure they are 
 		# reset DELT
-     	DELT.m <- 1
+     	DELT_f <- 1
 		
 		# recalculate heads
-		heads <- matrixtovector(read.table("gwt_headoutput",
-		                                   fill = TRUE))[1:(NX_in * NY_in)]
-		GWdepths <- heads - slopevector
+		heads <- matrixtovector(read.table("gwtmod/gwt_headoutput",
+		                                   fill = TRUE))[1:(NX * NY)]
+		gwdepths <- heads - slopevector_f
     		delta_h <- heads - last_t_heads
-     	qrivlat <- (delta_h - GWcumvector / aqy) * 100 * aqy
-     	GWcum <- GWcumvector
+     	qrivlat <- (delta_h - gwcumvector / aq_sy) * 100 * aq_sy
+     	gwcum <- gwcumvector
 
        	## Include stop code: 
        	if(max(heads)> -1) {
          		finalN <- t
          		print(paste("GW reaches root zone for time step = ",finalN))
        # 		print(NameRun)
-				print(GWcum)
-				print(heads)
-				print(DELT.m)
+# 				print(gwcum)
+# 				print(heads)
+# 				print(DELT_f)
          		STOP<-TRUE
        	}
 
 	# merge output
-	out <- data.frame(heads = heads, GWdepths = GWdepths, 
+	out <- data.frame(heads = heads, gwdepths = gwdepths, 
 	                  delta_h = delta_h,
-			qrivlat = qrivlat, Gwcum = GWcum)
+			qrivlat = qrivlat, gwcum = gwcum)
 	#print(out)
-	return(list(DELT = DELT.m, out = out, STOP = STOP))
+	return(list(DELT = DELT_f, out = out, STOP = STOP))
 }
 # ----------------------REVIEW BELOW for script
 # To run and extract output:
@@ -135,10 +142,9 @@ Gwt.fun <- function(t,last_t_heads, BC,
 # we are running over i timesteps and over j landscape cells
 
 
-big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in, 
+big_fun <- function(N, stype, vtype, aq_K, aq_specy, 
                     Rain, ETp, stream, gwheads, Zmean=NULL,
-		                rdir_in = NULL,
-		                today.m = today) {
+		                today=format(Sys.Date(),"%Y%m%d")) {
 #print(gwheads)
 #browser()
 # -----------------------------
@@ -146,30 +152,34 @@ big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
 # N: number of days for run
 # stype: soiltype from soilfunction.r
 # vtype: vector of vegetation types for vegfunction.r length no of cells
-# aqK_in and aq_specy_in s Aquifer K and sepcific yield
+# aq_K_f and aq_specy_f is Aquifer K and sepcific yield
 # Rain: 2 column dataframe: Date and Rainfall (cm/d)
 # ETp: 2 column dataframe: Date and Pot ET (cm/d)
-# adjusted WV 20120830
-# ++++ inserted WV 20120912+++
 # stream 3 column dataframe, second column is stream height, third column is right hand boundary
-# +++++
-##---Inserted WV 20121010 ---####
 # gwheads is a scalar or vector of initial gwheads (negative in m) length = NX
 # Zmean is a scalar of vector (length NX) of optimal groundwater depths for vegetation
 # Zmean is in cm and positive (Can be -100*gwheads)
-# rdir_in is the R directory to read functions and scripts
-# slope_in is the input slopevector
 # --------------------------
 
 
   soilpar_in <- Soil_cpp(stype)
   n <- soilpar_in$n
+  # check if this does not interfer with aq specy, do we need this?
   spec_y <- soilpar_in$spec_y
 
 # read the stream and gw data  
-#  ifelse(!dir.exists(file.path(rdir_in,"input")),print("gwt_input_parameters.r should be in a dir called input"),
-  gwinput = read.fun1(stream.m = stream, gwheads.m = gwheads)#) #1/(soilpar_in$K_s*0.01))
-
+  if (!dir.exists(file.path("gwtmod"))) {
+    print("GWT.exe and input files should be in a dir called GWTmod")
+  } else {
+    gwinput = read.fun1(stream.m = stream, gwheads.m = gwheads)
+  }
+# output of this function is a list with the following elements:
+#   list(bottommatrix=bottommatrix,bottomvector=bottomvector,
+#        slope=slope, riverheads=riverheads,
+#        distancetoriver = distancetoriver,
+#        init_heads = init_heads, criver = criver,
+#        Ariver = Ariver, hriver=hriver)
+   
   # definition of values from options()
   NX <- ecohydro2d.options()$NX
   NY <- ecohydro2d.options()$NY
@@ -178,7 +188,7 @@ big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
   IYR <- ecohydro2d.options()$IYR
   
 	# create a name for any output files
-	NameRun<-paste(today.m,N,stype,sep="_")
+	NameRun<-paste(today,N,stype,sep="_")
   # Initialise
   R <- Rain[,2] #vector with rain data
   deltat <- 12  
@@ -186,9 +196,9 @@ big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
   finalN <- N #this will be overwritten when formula stops before N is reached  
   STOP <- FALSE
     # introduce slopevector
-	if(NY==1){  slopevector.m <- gwinput$slope
+	if(NY==1){  slopevector <- gwinput$slope
     			}else{
-    		slopevector.m<-matrixtovector(gwinput$slope)  }
+    		slopevector<-matrixtovector(gwinput$slope)  }
 
 # -------- end preliminaries ----------------------
 
@@ -197,24 +207,11 @@ big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
 	Storage_day <- list(id = 1:N, s = matrix(0,nrow=N,ncol=NX*NY), 
 		qcap = matrix(0,nrow=N,ncol=NX*NY), Tgw = matrix(0,nrow=N,ncol=NX*NY),
 		Tsoil = matrix(0,nrow=N,ncol=NX*NY), Ttotal = matrix(0,nrow=N,ncol=NX*NY), 
-		Leakage = matrix(0,nrow=N,ncol=NX*NY), GWrech = matrix(0,nrow=N,ncol=NX*NY),
+		leakage = matrix(0,nrow=N,ncol=NX*NY), gwrech = matrix(0,nrow=N,ncol=NX*NY),
 		smloss = matrix(0,nrow=N,ncol=NX*NY),static_stress = matrix(0,nrow=N,ncol=NX*NY), 
 		surfoff = matrix(0,nrow=N,ncol=NX*NY))
-# 	Storage_Gridday <- data.frame(s = numeric(length=NX*NY), 
-# 		qcap = numeric(length=NX*NY), Tgw = numeric(length=NX*NY),
-# 		Tsoil = numeric(length=NX*NY), Ttotal = numeric(length=NX*NY), 
-# 		Leakage = numeric(length=NX*NY), GWrech = numeric(length=NX*NY),
-# 		smloss = numeric(length=NX*NY),static_stress = numeric(length=NX*NY), 
-# 		surfoff = numeric(length=NX*NY))
-# 
-# 	Storage_Subday <- data.frame(s = numeric(length=1/deltat), 
-# 		qcap = numeric(length=1/deltat), Tgw = numeric(length=1/deltat),
-# 		Tsoil = numeric(length=1/deltat), Ttotal = numeric(length=1/deltat), 
-# 		Leakage = numeric(length=1/deltat), GWrech = numeric(length=1/deltat),
-# 		smloss = numeric(length=1/deltat),static_stress = numeric(length=1/deltat), 
-# 		surfoff = numeric(length=1/deltat))
 
-
+# Storage for groundwater elements
 	GW_store <- list(id = 1:(N+1), heads = matrix(0.0,nrow=N+1,ncol=NX*NY), 
 				GWdepths = matrix(0.0,nrow=N+1,ncol=NX*NY),
 			 	delta_h = matrix(0.0,nrow=N+1,ncol=NX*NY),	
@@ -223,15 +220,17 @@ big_fun <- function(N, stype, vtype, aqK_in, aq_specy_in,
 # ----------------------------------------------
 while (STOP == FALSE) {
 # START OF THE LOOPS --------------------------#
+pb <- txtProgressBar(min = 0, max = N, style = 3)
+  
 # run a loop through the days
 	for (t in 1:N) {
-
+#browser()
   	  # Initialise
   		if (t == 1)	{
   		  # 1. define initial soil moisture
   		  s_init <- rep(0.5,NX*NY)
     		# 2. initialise gwheads
-  	   last_heads_in <- gwinput$gwheads
+  	   last_heads_in <- gwinput$init_heads
   	    # 3. initialise recharge
   	   rech <- rep(0.0,NX)
   		} else {
@@ -247,50 +246,52 @@ while (STOP == FALSE) {
   				# run gwt.exe function first time to
   			  #browser()
   				GW.out <- Gwt.fun(t, last_t_heads = last_heads_in, 
-  					BC = rep(gwinput$gwheads[NX],NRBL), first=T, 
-  					aqK = aqK_in, aqy = aq_specy_in, GWcumvector = rech, 
-  					slopevector = slopevector.m,
-  					DELT.m = DELT,
-  					NRBL.m = NRBL,
-  					river_in = list(gwinput$Ariver,gwinput$criver,
-  					IXR,IYR),rdir_echo=rdir_in)  
+  					BC = rep(gwinput$init_heads[length(gwinput$init_heads)],NRBL), first=T, 
+  					aq_K_f = aq_K, aq_sy = aq_specy, gwcumvector = rech, 
+  					slopevector_f = slopevector,
+  					DELT_f = DELT,
+  					river_f = list(gwinput$Ariver,gwinput$criver,IXR,IYR),
+  					gwinput_f=gwinput)  
   				# reset DELT (timestep)
   				DELT <- GW.out$DELT
   			} else { #this means river is dry, but last step also dry
   				#print("t1 > 1")
   				#print(GW_store$GWcum[t-1,])
   				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
-  					first=F, BC = rep(gwheads[NX],NRBL),  
-  					aqK = aqK_in, aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
-  					slopevector = slopevector.m,
-  					DELT.m = DELT,
-  					NRBL.m = NRBL,rdir_echo=rdir_in)
+  					first=F, 
+  					BC = rep(gwinput$init_heads[length(gwinput$init_heads)],NRBL),  
+  					aq_K_f = aq_K, aq_sy = aq_specy, gwcumvector=GW_store$GWcum[t-1,], 
+  					slopevector_f = slopevector,
+  					DELT_f = DELT,
+            gwinput_f=gwinput)
   			} #close loop whether first time run
   		}  else  { # river level > 0
   			# check if first time after river level back up or first time
   			if (stream[t-1,2] < 0.06 || t == 1) {
   				# run gwt.exe function
+  			  #browser()
       		GW.out <- Gwt.fun(t,last_t_heads = last_heads_in, 
-  					first=T, BC = c(riverheads[t],gwheads[NX]),
-  					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=rech, 
-  					slopevector = slopevector.m,
-  					DELT.m = DELT,
-  					NRBL.m = NRBL,
-  					river_in = list(Ariver,criver,
-  					                IXR,IYR),rdir_echo=rdir_in)
+  					first=T, 
+  					BC = c(gwinput$riverheads[t],gwinput$init_heads[length(gwinput$init_heads)]),
+  					aq_K_f = aq_K,  aq_sy = aq_specy, gwcumvector=rech, 
+  					slopevector_f = slopevector,
+  					DELT_f = DELT,
+  					river_f = list(gwinput$Ariver,gwinput$criver,IXR,IYR), 
+  					gwinput_f=gwinput)
   			} else {
   				GW.out <- Gwt.fun(t,last_t_heads = GW_store$heads[t-1,], 
-     					first=F, BC = c(gwinput$riverheads[t],gwinput$gwheads[NX]),
-  					aqK = aqK_in,  aqy = aq_specy_in, GWcumvector=GW_store$GWcum[t-1,], 
-  					slopevector = slopevector.m,
-  					DELT.m = DELT,
-  					NRBL.m = NRBL,rdir_echo=rdir_in)  
+     					first=F, 
+     					BC = c(gwinput$riverheads[t],gwinput$init_heads[length(gwinput$init_heads)]),
+  					aq_K_f = aq_K,  aq_sy = aq_specy, gwcumvector=GW_store$GWcum[t-1,], 
+  					slopevector_f = slopevector,
+  					DELT_f = DELT,
+  					gwinput_f=gwinput)  
   			} # Close if loop whether first time run
   		} # close riverlevel loop
   				# reset DELT
   				# print(paste("gwt.exe is run and DELT =",DELT))
   			#	DELT <- GW.out$DELT
-  				GW.out$out$Gwcum <- rep(0.0,NX)
+  				GW.out$out$gwcum <- rep(0.0,NX)
   				STOP <- GW.out$STOP
   				#print(STOP)
   			#	print(GW.out$out$Gwcum)
@@ -304,40 +305,37 @@ while (STOP == FALSE) {
   		GW_store <- list.write.fun(r, input=GW.out$out, 
   			output = GW_store, t = t) 
   		#str(GW_store)
-  #		print("GW_store$GWcum:")
-  		#print(GW_store$GWdepths[t,])
-  #		save(GW_store,file="GW_store_temp")
   	#browser()
-  		if(is.null(Zmean)==T) Zmean_in <- rep(200,NX) else Zmean_in <- Zmean 
-      Storage_Gridday <- WBEcoHyd(t=t,R=R[t],ET_in=ETp[t,2],vtype=vtype,
-                               soilpar=soilpar_in, s_init = s_init, 
-                               fullday = t, 
-                               Zmean = Zmean_in,
-                               GWdepths=-100*GW_store$GWdepths[t,], 
-                              GWdepths_prev=-100*last_heads_in,
-                               deltat=12, NX, NY)
+  		if(is.null(Zmean)==T) Zmean <- rep(200,NX) else Zmean <- Zmean 
+      Storage_Gridday <- WBEcoHyd(t = t, R = R[t], ET_in = ETp[t,2],
+                                vtype = vtype, soilpar = soilpar_in, 
+                                s_init = s_init, Zmean = Zmean,
+                                GWdepths = -100*GW_store$GWdepths[t,], 
+                                GWdepths_prev = -100*last_heads_in,
+                                deltat = deltat, NX, NY)
   		#browser()
    		# daily values across grid
-  		Storage_day <- list.write.fun2(input=Storage_Gridday, 
-  		 		output = Storage_day, t=t)
+  		Storage_day <- list.write.fun2(input = Storage_Gridday, 
+  		 		output = Storage_day, t = t)
   		#str(Storage_day)
   		# Accumulate the GW recharge, this is now in GW_store
-  		GW_store$GWcum[t,] <- GW_store$GWcum[t,] + Storage_day$GWrech[t,]*0.01 # m/day		
+  		GW_store$GWcum[t,] <- GW_store$GWcum[t,] + Storage_day$gwrech[t,]*0.01 # m/day		
   		#print(Storage_day$GWrech[t,]*0.01)
-  		print(paste("t =",t))
+  		  # update progress bar
+  		  setTxtProgressBar(pb, t)
 	} # close t loop
-
+close(pb)
 # ------------ END OF LOOPS ---------------------
 #browser()
 # Run gwt_fun one last time
 	GW.out <- Gwt.fun(t = N+1, last_t_heads = GW_store$heads[N,], 
 	      first=F,#
-				BC = c(gwinput$riverheads[t],gwinput$gwheads[NX]), 
-				aqK = aqK_in,  aqy = aq_specy_in, 
-				GWcumvector=GW_store$GWcum[N,], 
-				slopevector = slopevector.m,
-				DELT.m = DELT,
-				NRBL.m = NRBL,rdir_echo=rdir_in)
+				BC = c(gwinput$riverheads[t],gwinput$init_heads[length(gwinput$init_heads)]), 
+				aq_K_f = aq_K,  aq_sy = aq_specy, 
+				gwcumvector=GW_store$GWcum[N,], 
+				slopevector_f = slopevector,
+				DELT_f = DELT,
+				gwinput_f=gwinput)
 	# write away gw output 
 	r <- 1:(ncol(GW.out$out))
 	GW_store <- list.write.fun(r, input=GW.out$out, 
@@ -372,13 +370,13 @@ write.table(Wb,paste(getwd(),"/output/",NameRun,"_Output_WB_table.csv",sep=""),r
 
 # Create output out of function
 # vector of X distances etc
-Storage_day$x=distancetoriver
+Storage_day$x=gwinput$distancetoriver
 Storage_day$vtype = vtype
 Storage_day$gwlevel = GW_store$GWdepths[1:N,]
 Storage_day$qrivlat = GW_store$qrivlat[1:N,]
-Storage_day$Rain = Rain[1:N,2]
-Storage_day$Stream = Stream[1:N,2]
-print(NameRun)
+Storage_day$rain = Rain[1:N,2]
+Storage_day$stream = stream[1:N,2]
+#print(NameRun)
 # ------------------------------------- end output-----------------
 return(Storage_day)
 

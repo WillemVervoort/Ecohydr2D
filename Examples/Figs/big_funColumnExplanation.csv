@@ -1,0 +1,18 @@
+Name,Explanation
+id,simple counter for location
+s,relative soil moisture
+qcap,capillary flow from groundwater into soil profile
+Tgw,Transpiration from groundwater via deep roots
+Tsoil,Transpiration from soil
+Ttotal,Total transpiration (Evapotranspiration)
+leakage,Leakage from soil profile to groundwater
+gwrech,Recharge into groundwater = Leakage
+smloss,loss of soil moisture for each time step
+static_stress,static stress of the vegetation
+surfoff,surface runoff
+x,distance along the x grid from the river
+vtype,vegetation type for each grid cell
+gwlevel,groundwater level
+qrivlat,lateral flow from river to groundwater
+rain,Rainfall
+stream,Streamflow

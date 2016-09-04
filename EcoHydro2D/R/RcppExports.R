@@ -57,7 +57,7 @@ WB_fun_cpp <- function(vegpar_in, In, last_t_soil_sat, soilpar_in, Zmean_in, del
     .Call('EcoHydro2D_WB_fun_cpp', PACKAGE = 'EcoHydro2D', vegpar_in, In, last_t_soil_sat, soilpar_in, Zmean_in, deltat, Z_prev, Z_in)
 }
 
-WBEcoHyd <- function(t, R, ET_in, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY) {
-    .Call('EcoHydro2D_WBEcoHyd', PACKAGE = 'EcoHydro2D', t, R, ET_in, vtype, soilpar, s_init, fullday, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY)
+WBEcoHyd <- function(t, R, ET_in, vtype, soilpar, s_init, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY) {
+    .Call('EcoHydro2D_WBEcoHyd', PACKAGE = 'EcoHydro2D', t, R, ET_in, vtype, soilpar, s_init, Zmean, GWdepths, GWdepths_prev, deltat, NX, NY)
 }
 
