@@ -1,0 +1,195 @@
+---
+title: "Vignette EcoHydro2D v0.0.1"
+author: "Willem Vervoort"
+date: "3 September 2016"
+output: pdf_document
+---
+
+# 1. Introduction
+This is the vignette demonstrating the alpha version of the ecohydr2d package. The package contains functions based on the ecohydrological work from Vervoort and van der Zee (2012) but extended to include a 1-D models included in a 2-D grid overlying a single cell groundwater system modelled with a separate fortran groundwater model developed by Prof. Toon Leijnse (gwt.exe). 
+![Model schematic](figs/modelschematic.jpg)
+
+Vervoort R.W. and S.E.A.T.M. van der Zee (2012) On stochastic modelling of groundwater uptake in semi-arid water-limited systems: root density and seasonality effects. _Ecohydrology_ [doi:10.1002/eco.1288](doi:10.1002/eco.1288).  
+
+# 2. First example: uniform rainfall
+This first examples shows how the program is set up and how a simple simulation of a basic model with 10 grid cells with a uniform vegetation can be set up. This includes the set up of the input files for gwt.exe as well as the overall model setup and analysis of the output
+
+## 2.1 Step 1: setup of packages and working directory  
+This currently assumes that the package EcoHydro2D is installed and can be loaded. Once I have worked out how Git and devtools work together I will change this.  
+```{r preliminaries}
+require(ggplot2)
+require(EcoHydro2D)
+require(knitr)
+
+today <- format(Sys.Date(),"%Y%m%d")
+```
+
+## 2.2 Step 2 define inputs: uniform rainfall for two years  
+We will start with a scenario which simulates uniform rainfall and uniform potential ET on a 10 cell linear grid in the x-direction (so the y-dimension is 1). Units in the model are cm and days.  
+The first step will be to define the three input time series that are needed for the model:
+
+* Rainfall, uniform 0.25 cm/day
+* Streamflow (which is set to 0 here)
+* potential ET, uniform 0.5 cm/day  
+The date values are arbitrary.   
+The model is still quite slow, so starting off with only 3 months of data.
+
+```{r define inputs}
+days <- seq(as.Date("2005-01-01"),as.Date("2005-3-31"),by=1)
+Rain_uni <- data.frame(Dates = days, Rain = rep(0.1,length(days)))
+# start with no water in Stream
+Stream0 <- data.frame(Dates = days, Height = rep(0,length(days)))
+# and uniform ETp
+ETp_uni <- data.frame(Dates = days, ET = rep(0.5,length(days)))
+```
+
+### 2.2.1 step 2a define groundwater model parameters
+One of the things to do is to define the parameters for the groundwater model. This is slightly cryptic, but is described in more detail in the manual of gwt.exe which is provided in the documents folder. Currently the important values are hidden in a list under `ecohydro2d.options()`
+
+
+```{r gwt_input}
+# show the options
+ecohydro2d.options()
+# you can now call different elements and reset them
+
+# Initial groundwater heads
+gw_in <-  rep(-6,ecohydro2d.options()$NX)
+# this is needed for Trees with deep roots
+Zmean <- rep(600,ecohydro2d.options()$NX) 
+```
+
+## 2.3 step 3 define the soils and vegetation
+We can now define the vegetation and the soils, starting off with uniform grass.
+
+```{r defineVegSoil}
+# Define the vegetation series as being uniform grass
+veg <- rep("Grass",ecohydro2d.options()$NX)
+# Define what soil to use
+soils <- "L Med Clay"
+sp <- Soil_cpp("soils")
+#
+```
+
+## 2.4 step 4 Run the model over the grid cells
+Finally the model can be run via `big_fun`. I need to come up with a better name for this function. There is the ability to specify a separate Ks for the aquifer `aq_K` and also a separate specific yield via `aq_specy`.   
+```{r runFunction, results="hide"}
+result <- big_fun(N=nrow(Rain_uni),stype=soils,vtype=veg, 
+                          aq_K = sp$K_s/100,  
+                          aq_specy  = sp$spec_y,
+                          Rain=Rain_uni, ETp=ETp_uni,
+                          stream=Stream0, gwheads = gw_in, 
+                          Zmean = Zmean,today = today)
+```
+  
+## 2.5 step 5 plotting the results
+Now some plotting of the results to demonstrate how the function works. The output of `big_fun()` is large data frame with all the different variables. The Table below lists all the different columns.  
+```{r tableOutput}
+names(result)
+kable(read.csv("figs/big_funColumnExplanation.csv"))
+```
+
+First some preparation of the data to make the plotting easier. Use the utility function `stackfun()` that creates a stacked dataframe by location.   
+```{r plot_prep}
+# use stackfun
+Out <- stackfun(result,ecohydro2d.options()$NX)
+head(Out) # creates a wide dataframe
+
+# put in dates rather than sequential numbers:
+Out$Dates <- rep(Rain_uni$Dates[1:length(result[[1]])],
+                 ecohydro2d.options()$NX)
+```
+
+Now use `ggplot()` to create a figure by location
+```{r plotting}
+p <- ggplot(Out,aes(x=Dates,y=Ttotal)) + geom_line(aes(col="Total T"))
+p <- p + facet_wrap(~location,labeller=label_both)
+p <- p + theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+print(p)
+```
+
+Of course the soil transpiration at each location looks exactly the same as the rainfall is constant, there is no groundwater input and no spatial variation in the vegetation. The groundwater level is a flat line (not shown) as there is no interaction with the river.
+
+# 3. Second example: a river with a constant flow 
+The obvious second example is with a river with constant flow, keeping the rest of the scenario the same. For this we need to redefine the streamflow to have a constant height. For the rest use all the variables already defined in the previous example.   
+```{r streamheight}
+# Stream with constant flow
+Stream1 <- data.frame(Dates = days, Height = rep(1,length(days)))
+```
+
+## 3.1 run the function again
+```{r runFunction_wriver, results="hide"}
+result_wriver <- big_fun(N=nrow(Rain_uni),stype=soils,vtype=veg, 
+                          aq_K = sp$K_s/100,  
+                          aq_specy  = sp$spec_y,
+                          Rain=Rain_uni, ETp=ETp_uni,
+                          stream=Stream1, gwheads = gw_in, 
+                          Zmean = Zmean,today = today)
+```
+
+## 3.2 plot the results with river
+Again some preparation of the data to make the plotting easier. 
+```{r plot_prep_wriver}
+# use stackfun
+Out_wriver <- stackfun(result_wriver,ecohydro2d.options()$NX)
+head(Out_wriver) # creates a wide dataframe
+
+# put in dates rather than sequential numbers:
+Out_wriver$Dates <- rep(Rain_uni$Dates[1:length(result[[1]])],
+                 ecohydro2d.options()$NX)
+```
+
+There would be no difference in the transpiration as there is no variation in the vegetation. So this is a figure by location of the groundwater level.  
+```{r plotting_gw}
+p <- ggplot(Out_wriver,aes(x=Dates,y=gwlevel)) + geom_line(aes(col="Groundwater level"))
+p <- p + facet_wrap(~location,labeller=label_both)
+p <- p + theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+print(p)
+```
+  
+It is clear that the cells close to the river have an increasing groundwater table due to the interaction with the river.
+
+# 4. Third example: using different vegetation at the sites  
+The next example shows the difference between trees with deep roots and grass vegetation in terms of transpiration from groundwater and soil. using the same configuration as the second example (using a river with constant flow).
+
+## 4.1 Create new vegetation series
+
+```{r defineNewVeg}
+# Define the vegetation series as being uniform grass
+veg_new <- c(rep("TreesDR",ecohydro2d.options()$NX/2),rep("Grass",ecohydro2d.options()$NX/2))
+```
+
+So this creates trees with deep roots on the first 5 (+ 1 river) cells and grass on the last 5 (+ 1 boundary condition) cells. We can now run the model again and plot the transpiration to see how this is affected by the different vegetation.
+
+## 4.2 run the model again with different veg  
+```{r runveg_newFunction, results="hide"}
+result_new_veg <- big_fun(N=nrow(Rain_uni),stype=soils,vtype=veg_new, 
+                          aq_K = sp$K_s/100,  
+                          aq_specy  = sp$spec_y,
+                          Rain=Rain_uni, ETp=ETp_uni,
+                          stream=Stream1, gwheads = gw_in, 
+                          Zmean = Zmean,today = today)
+```
+
+## 4.3 plot the Transpiration results  
+Again some preparation of the data to make the plotting easier. 
+```{r plot_prep_nv}
+# use stackfun
+Out_new_veg <- stackfun(result_new_veg,ecohydro2d.options()$NX)
+head(Out_new_veg) # creates a wide dataframe
+
+# put in dates rather than sequential numbers:
+Out_new_veg$Dates <- rep(Rain_uni$Dates[1:length(result[[1]])],
+                 ecohydro2d.options()$NX)
+```
+  
+Plot both the total transpiration, the soil transpiration and the groundwater derived transpiration.  
+```{r plotting_new_veg}
+p <- ggplot(Out_new_veg,aes(x=Dates,y=Ttotal)) + geom_line(aes(col="Total T"))
+p <- p + geom_line(aes(x=Dates,y=Ts,col = "T soil")) 
+p <- p + geom_line(aes(x=Dates,y=Tg,col = "T groundwater"))
+p <- p + facet_wrap(~location,labeller=label_both)
+p <- p + theme(axis.text.x  = element_text(angle=90, vjust=0.5))
+print(p)
+```
+  
+This clearly shows the transition from groundwater transpiration to soil transpiration for the cells with Trees, while for the cells with grass the only transpiration is from the soil. Also visible is that the groundwater transpiration decreases with distance from the river.  

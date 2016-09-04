@@ -118,7 +118,6 @@ List WB_fun_cpp(List vegpar_in, double In, double last_t_soil_sat,
 NumericMatrix WBEcoHyd(int t, double R, double ET_in,
                        CharacterVector vtype, List soilpar,
                        NumericVector s_init,
-                       double fullday,
                        NumericVector Zmean,
                        NumericVector GWdepths,
                        NumericVector GWdepths_prev,
@@ -152,6 +151,7 @@ NumericMatrix WBEcoHyd(int t, double R, double ET_in,
   for (int j = 0;j < m;j++) {
     // Call the vegpar function
     std::string veg_in = as<std::string>(vtype[j]);
+    //Rcpp::Rcout << veg_in << std::endl; 
     List vegpar = Veg_cpp(veg_in, soilpar);
     vegpar["Ep"] = ET_in;
     // define soil and vegparameters
@@ -192,10 +192,12 @@ NumericMatrix WBEcoHyd(int t, double R, double ET_in,
     // recalculate to daily output and write away
     // produce different output, produce daily values for each grid cell
     int kk = Storage_Grid.nrow();
+    //Rcpp::Rcout << kk << std::endl;
     for (int k = 0; k < kk; k++) {
       Storage_Grid(k,j) = sum(Storage_Subday(k,_));
       if (k == 0 || k == 8) Storage_Grid(k,j) = mean(Storage_Subday(k,_));
     }
+    //Rcpp::Rcout << j << std::endl;
     
   } // close j loop
   // x = 4;

@@ -29,11 +29,11 @@
     RES = NULL,
     criver = c(RES,0.1), #resistance (m) # WV says Increase this to limit leakage from river
     Ariver <- rep(100,NRBL), # river area (m^2) # this is a guess
-    riverheads <- ifelse(NRBL > 0,rep(2,NRBL),NULL),  # water head river (m). 
-    # This assumes no overbank flows in the period. 
-    #creates riverheads vector
-    
-    if(NRBL==0) hriver = 0 # should have some value, otherwise: formula breaks off
+#    if (NRBL > 0) {
+      riverheads <- rep(2,NRBL) # water head river (m). 
+ #   } else {
+  #    hriver=0 # should have some value, otherwise: formula breaks off
+   # }
   )
 }
     
