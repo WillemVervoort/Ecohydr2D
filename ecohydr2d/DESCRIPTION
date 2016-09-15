@@ -1,0 +1,14 @@
+Package: ecohydr2d
+Title: Implementation of ecohydrological functions in a 2D framework
+Version: 0.0.0.9000
+Authors@R: person("Willem", "Vervoort", email = "willem.vervoort@sydney.edu.au", role = c("aut", "cre"))
+Description: An implementation of zero-dimensional ecohydrological models in a
+    2D framework which allows interaction with lateral groundwater flow. The 
+	original functions were published in Vervoort and van der Zee (2008; 2009;
+	2012) except for the groundwater component, which is currently unpublished.
+Depends: R (>= 3.2.3)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.4), RcppEigen, lattice
+LinkingTo: Rcpp, RcppEigen, RcppNumerical

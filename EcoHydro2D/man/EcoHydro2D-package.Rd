@@ -13,7 +13,7 @@
 The DESCRIPTION file:
 \packageDESCRIPTION{EcoHydro2D}
 \packageIndices{EcoHydro2D}
-This package brings together the functions related to two dimensional ecohydrological modelling based on Vervoort and van der Zee (2012)
+This package brings together the functions related to the two dimensional ecohydrological modelling based on Vervoort and van der Zee (2012)
 }
 \author{
 \packageAuthor{EcoHydro2D}

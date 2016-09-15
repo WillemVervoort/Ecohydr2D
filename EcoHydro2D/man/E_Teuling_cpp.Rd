@@ -53,8 +53,13 @@ R. Willem Vervoort willemvervoort@gmail.com
 }
 \examples{
 soilpar <- Soil_cpp("S Clay Loam")
-vegpar <- Veg_cpp("Trees",soilpar)
+vegpar <- Veg_cpp("Grass",soilpar)
 E_Teuling_cpp(0.5,vegpar)
+
+# show for a range of values
+s <- seq(0, 1, length = 100)
+plot(s, E_Teuling_cpp(s, vegpar), type = "l", col = "red", lwd = 2,
+	xlab = "soil saturation", ylab = "actual transpiration")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
